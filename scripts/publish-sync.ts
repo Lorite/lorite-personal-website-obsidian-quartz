@@ -24,7 +24,7 @@ const argv = yargs(hideBin(process.argv))
   .option("assets", {
     alias: "a",
     type: "string",
-    default: "assets",
+    default: "",
     describe: "Destination subfolder for copied assets",
   })
   .option("ignore", {
@@ -52,6 +52,24 @@ const sourceRoot = path.resolve(argv.source)
 const destRoot = path.resolve(argv.dest)
 const destAssetRoot = path.join(destRoot, argv.assets)
 
+const ASSET_EXTS = new Set([
+  ".png",
+  ".jpg",
+  ".jpeg",
+  ".gif",
+  ".svg",
+  ".webp",
+  ".bmp",
+  ".tiff",
+  ".pdf",
+  ".mp4",
+  ".mov",
+  ".webm",
+  ".mp3",
+  ".wav",
+  ".ogg",
+])
+
 function shouldPublish(value: unknown) {
   return value === true || value === "true"
 }
@@ -68,6 +86,56 @@ function normalizeAssetRef(ref: string) {
   return trimmed.replace(/^!/, "")
 }
 
+function stripAliasAndFragment(ref: string) {
+  // Obsidian alias: file.png|Alias -> take before '|'
+  const base = ref.split("|")[0]
+  // Strip URL fragment (?x or #x)
+  return base.split("#")[0].split("?")[0]
+}
+
+function isExternal(href: string): boolean {
+  return /^(https?:)?\/\//i.test(href) || href.startsWith("data:")
+}
+
+function isAssetPath(p: string): boolean {
+  const ext = path.extname(p.toLowerCase())
+  return ASSET_EXTS.has(ext)
+}
+
+function extractAssetRefsFromContent(contents: string): string[] {
+  const refs = new Set<string>()
+
+  // Markdown images ![alt](path "title") and links [text](path)
+  const mdLinkRe = /!?\[[^\]]*\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g
+  let m: RegExpExecArray | null
+  while ((m = mdLinkRe.exec(contents)) !== null) {
+    const href = m[1]
+    if (!isExternal(href)) {
+      const cleaned = stripAliasAndFragment(normalizePathFragment(href))
+      if (isAssetPath(cleaned)) refs.add(cleaned)
+    }
+  }
+
+  // Obsidian embeds ![[asset.ext]] and links [[asset.ext]] (only if looks like asset)
+  const obsidianLinkRe = /!?\[\[([^\]]+)\]\]/g
+  while ((m = obsidianLinkRe.exec(contents)) !== null) {
+    const target = stripAliasAndFragment(normalizePathFragment(m[1]))
+    if (isAssetPath(target)) refs.add(target)
+  }
+
+  // HTML tags <img src="...">, <video src>, <audio src>, <source src>
+  const htmlSrcRe = /<(?:img|video|audio|source)[^>]*\s+src=["']([^"']+)["'][^>]*>/gi
+  while ((m = htmlSrcRe.exec(contents)) !== null) {
+    const href = m[1]
+    if (!isExternal(href)) {
+      const cleaned = stripAliasAndFragment(normalizePathFragment(href))
+      if (isAssetPath(cleaned)) refs.add(cleaned)
+    }
+  }
+
+  return Array.from(refs)
+}
+
 async function pathExists(fp: string) {
   try {
     await fs.promises.access(fp, fs.constants.F_OK)
@@ -77,7 +145,7 @@ async function pathExists(fp: string) {
   }
 }
 
-async function resolveAssetPath(assetRef: string): Promise<string | null> {
+async function resolveAssetPath(assetRef: string, ignoreGlobs: string[]): Promise<string | null> {
   const cleanedRef = normalizePathFragment(normalizeAssetRef(assetRef))
   const directPath = path.join(sourceRoot, cleanedRef)
   if (await pathExists(directPath)) return directPath
@@ -85,7 +153,7 @@ async function resolveAssetPath(assetRef: string): Promise<string | null> {
   const matches = await globby([`**/${path.basename(cleanedRef)}`], {
     cwd: sourceRoot,
     absolute: true,
-    ignore: argv.ignore as string[],
+    ignore: ignoreGlobs,
   })
 
   if (matches.length === 1) return matches[0]
@@ -97,21 +165,70 @@ async function resolveAssetPath(assetRef: string): Promise<string | null> {
   return null
 }
 
+function sanitizeFilename(name: string): string {
+  return name.trim().replace(/[<>:"|?*\x00-\x1f]/g, "_")
+}
+
 function resolveNoteDestination(srcFile: string, frontmatterPath?: unknown) {
   const rel = path.relative(sourceRoot, srcFile)
   if (typeof frontmatterPath === "string" && frontmatterPath.length > 0) {
     const normalized = normalizePathFragment(frontmatterPath)
-    if (normalized.endsWith(".md")) {
-      return path.join(destRoot, normalized)
+    const sanitized = normalized
+      .split("/")
+      .map((seg) => sanitizeFilename(seg))
+      .join("/")
+    if (sanitized.endsWith(".md")) {
+      return path.join(destRoot, sanitized)
     }
-    return path.join(destRoot, normalized, path.basename(srcFile))
+    return path.join(destRoot, sanitized, sanitizeFilename(path.basename(srcFile)))
   }
-  return path.join(destRoot, rel)
+  const sanitizedRel = rel
+    .split("/")
+    .map((seg) => sanitizeFilename(seg))
+    .join("/")
+  return path.join(destRoot, sanitizedRel)
 }
 
 async function copyFile(src: string, dest: string) {
   await fs.promises.mkdir(path.dirname(dest), { recursive: true })
   await fs.promises.copyFile(src, dest)
+}
+
+function expandIgnorePatterns(patterns: string[]): string[] {
+  const out: string[] = []
+  for (const raw of patterns) {
+    if (!raw || typeof raw !== "string") continue
+    const p = raw.replace(/^\.\//, "")
+    const hasGlob = /[\\*?\[\]]/.test(p)
+    if (hasGlob) {
+      out.push(`**/${p}`)
+    } else {
+      out.push(`**/${p}`, `**/${p}/**`)
+    }
+  }
+  return Array.from(new Set(out))
+}
+
+async function loadQuartzIgnorePatterns(): Promise<string[]> {
+  const configPath = path.resolve(process.cwd(), "quartz.config.ts")
+  if (!(await pathExists(configPath))) return []
+  try {
+    const content = await fs.promises.readFile(configPath, "utf8")
+    // Find `ignorePatterns: [ ... ]` and extract all quoted strings inside
+    const match = content.match(/ignorePatterns\s*:\s*\[([\s\S]*?)\]/)
+    if (!match) return []
+    const inside = match[1]
+    const strings: string[] = []
+    const re = /(["'`])((?:\\\1|.)*?)\1/g
+    let m: RegExpExecArray | null
+    while ((m = re.exec(inside)) !== null) {
+      strings.push(m[2])
+    }
+    return strings
+  } catch (e) {
+    console.warn("⚠️  Could not read ignorePatterns from quartz.config.ts:", (e as Error).message)
+    return []
+  }
 }
 
 async function sync() {
@@ -125,10 +242,15 @@ async function sync() {
   }
   await fs.promises.mkdir(destRoot, { recursive: true })
 
+  // Build ignore globs by merging CLI ignores with Quartz config ignorePatterns
+  const cliIgnore = (argv.ignore as string[]) ?? []
+  const quartzIgnores = await loadQuartzIgnorePatterns()
+  const ignoreGlobs = Array.from(new Set([...expandIgnorePatterns(cliIgnore), ...expandIgnorePatterns(quartzIgnores)]))
+
   const markdownFiles = await globby(["**/*.md"], {
     cwd: sourceRoot,
     absolute: true,
-    ignore: argv.ignore as string[],
+    ignore: ignoreGlobs,
   })
 
   let publishedCount = 0
@@ -145,15 +267,13 @@ async function sync() {
     await copyFile(file, dest)
     publishedCount += 1
 
-    if (Array.isArray(parsed.data.assets)) {
-      for (const assetRef of parsed.data.assets) {
-        if (typeof assetRef !== "string") continue
-        const resolved = await resolveAssetPath(assetRef)
-        if (!resolved) continue
-        const cleanedRef = normalizePathFragment(normalizeAssetRef(assetRef))
-        const destPath = path.join(destAssetRoot, cleanedRef)
-        assetsToCopy.set(resolved, destPath)
-      }
+    // Auto-detect asset references from note content
+    const detectedRefs = extractAssetRefsFromContent(contents)
+    for (const assetRef of detectedRefs) {
+      const resolved = await resolveAssetPath(assetRef, ignoreGlobs)
+      if (!resolved) continue
+      const destPath = path.join(destAssetRoot, assetRef)
+      assetsToCopy.set(resolved, destPath)
     }
   }
 

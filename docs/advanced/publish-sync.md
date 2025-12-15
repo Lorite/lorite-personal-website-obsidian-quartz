@@ -11,16 +11,12 @@ Add frontmatter to any note you want to publish:
 publish: true
 # Optional: place this note at a custom path inside the published folder
 path: blog/my-post.md
-# Optional: explicitly list assets to copy alongside the note
-assets:
-  - "[[my-image.png]]"
-  - "[[images/diagram.svg]]"
 ---
 ```
 
 ## 2) Sync the publishable subset
 
-Run the helper script to copy only `publish: true` notes plus listed assets into a clean destination (defaults shown below):
+Run the helper script to copy only `publish: true` notes and any assets it detects in the note content (Markdown images/links, Obsidian embeds, HTML tags `img`, `video`, `audio`, `source`) into a clean destination (defaults shown below):
 
 ```bash
 npm run sync:published -- \
@@ -37,7 +33,7 @@ Flags:
 - `--ignore` (`-i`): extra glob patterns to skip while scanning.
 - `--no-clean`: keep existing files in the destination instead of wiping it first.
 
-> The script mirrors the behavior described in [this Obsidian → Quartz sync guide](https://umwelt.dineshnatesan.com/wiki/Obsidian-Quartz-sync): it only copies notes with `publish: true`, honors an optional `path` override, and copies any assets explicitly listed in the frontmatter `assets` array.
+> The script mirrors the behavior described in [this Obsidian → Quartz sync guide](https://umwelt.dineshnatesan.com/wiki/Obsidian-Quartz-sync): it only copies notes with `publish: true`, honors an optional `path` override, and copies any assets it finds referenced in the note content.
 
 ## 3) Build Quartz from the filtered folder
 
