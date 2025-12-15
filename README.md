@@ -1,5 +1,10 @@
 # Lorite's Notes
 
+## Build and Preview
+
+- `npm run sync:published -- --source "/home/lori/git/lorite-obsidian-notes" --dest "content"`
+- `docker run --rm -it -p 8080:8080 -p 3001:3001 -v /home/lori/git/lorite-personal-website-obsidian-quartz/content:/usr/src/app/content $(docker build -q .)`
+
 ## GitHub repository
 
 - From https://quartz.jzhao.xyz/setting-up-your-GitHub-repository
