@@ -245,7 +245,9 @@ async function sync() {
   // Build ignore globs by merging CLI ignores with Quartz config ignorePatterns
   const cliIgnore = (argv.ignore as string[]) ?? []
   const quartzIgnores = await loadQuartzIgnorePatterns()
-  const ignoreGlobs = Array.from(new Set([...expandIgnorePatterns(cliIgnore), ...expandIgnorePatterns(quartzIgnores)]))
+  const ignoreGlobs = Array.from(
+    new Set([...expandIgnorePatterns(cliIgnore), ...expandIgnorePatterns(quartzIgnores)]),
+  )
 
   const markdownFiles = await globby(["**/*.md"], {
     cwd: sourceRoot,
