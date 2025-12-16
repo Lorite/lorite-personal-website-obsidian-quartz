@@ -6,6 +6,8 @@ import * as Plugin from "./quartz/plugins"
  *
  * See https://quartz.jzhao.xyz/configuration for more information.
  */
+const baseUrl = process.env.QUARTZ_BASE_URL ?? "alejandro.lorite.eu"
+
 const config: QuartzConfig = {
   configuration: {
     pageTitle: "Lorite's Notes",
@@ -16,7 +18,7 @@ const config: QuartzConfig = {
       provider: "plausible",
     },
     locale: "en-US",
-    baseUrl: "alejandro.lorite.eu",
+    baseUrl,
     ignorePatterns: ["private", "templates", ".obsidian"],
     defaultDateType: "modified",
     theme: {

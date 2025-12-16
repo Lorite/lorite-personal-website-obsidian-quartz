@@ -19,6 +19,8 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-22.04
+    env:
+      QUARTZ_BASE_URL: "https://lorite.github.io/lorite-personal-website-obsidian-quartz"
     steps:
       - uses: actions/checkout@v4
         with:
