@@ -55,6 +55,7 @@
     "hast-util-to-html": "^9.0.5",
     "hast-util-to-jsx-runtime": "^2.3.6",
     "hast-util-to-string": "^3.0.1",
+    "http-server": "^14.1.1",
     "is-absolute-url": "^5.0.0",
     "js-yaml": "^4.1.1",
     "lightningcss": "^1.30.2",
