@@ -26,6 +26,14 @@ jobs:
           node-version: 22
       - name: Install Dependencies
         run: npm ci
+      - name: Checkout private notes repository
+        uses: actions/checkout@v4
+        with:
+          repository: Lorite/lorite-obsidian-notes
+          token: ${{ secrets.NOTES_REPO_TOKEN }}
+          path: notes-repo
+      - name: Sync published notes to content
+        run: npm run sync:published -- --source "notes-repo" --dest "content"
       - name: Build Quartz
         run: npx quartz build
       - name: Upload artifact
