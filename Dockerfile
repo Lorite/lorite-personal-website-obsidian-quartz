@@ -9,6 +9,9 @@ WORKDIR /usr/src/app
 COPY --from=deps /usr/src/app/node_modules /usr/src/app/node_modules
 COPY . .
 
+# Install curl for healthchecks
+RUN apt-get update && apt-get install -y curl wget && rm -rf /var/lib/apt/lists/*
+
 # Expect notes to be mounted at runtime
 ENV NOTES_SOURCE=/root/lorite-obsidian-notes
 RUN npm install --global http-server
