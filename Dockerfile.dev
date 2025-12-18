@@ -9,6 +9,4 @@ WORKDIR /usr/src/app
 COPY --from=builder /usr/src/app/ /usr/src/app/
 COPY . .
 
-# CMD ["pwd"]
-# CMD ["ls", "-la", "content"]
 CMD ["npx", "quartz", "build", "--serve"]
