@@ -2,8 +2,10 @@
 
 ## Build and Preview
 
-- `npm run sync:published -- --source "/home/lori/git/lorite-obsidian-notes" --dest "content"`
-- `docker run --rm -it -p 8080:8080 -p 3001:3001 -v /home/lori/git/lorite-personal-website-obsidian-quartz/content:/usr/src/app/content $(docker build -q .)`
+- Update the generated content files after modifying a note in Obsidian (**run whenever you want to see the changes**): `npm run sync:published -- --source "/home/lori/git/lorite-obsidian-notes" --dest "content"`
+- Start the development server (run once): `docker run --rm -it -p 8080:8080 -p 3001:3001 -v ./content:/usr/src/app/content $(docker build -q -t quartz-dev -f Dockerfile.dev .)`
+- You might need to modify a content file once to trigger the server to pick up changes. For example, change a character in `content/index.md` and save it. This happens because the serve command is run before the folder is mounted.
+- Open your browser to `http://localhost:3001` to preview the site.
 
 ## GitHub repository
 
