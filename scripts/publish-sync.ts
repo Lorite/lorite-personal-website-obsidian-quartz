@@ -103,7 +103,10 @@ function isAssetPath(p: string): boolean {
 }
 
 function removePrivateNotes(content: string): string {
-  return content.replace(/\n*{%\s*start_private_notes\s*%\}[\s\S]*?\{%\s*end_private_notes\s*%\}\n*/g, "")
+  return content.replace(
+    /\n*{%\s*start_private_notes\s*%\}[\s\S]*?\{%\s*end_private_notes\s*%\}\n*/g,
+    "",
+  )
 }
 
 function extractAssetRefsFromContent(contents: string): string[] {
@@ -294,11 +297,11 @@ async function sync() {
     if (!shouldPublish(parsed.data.publish)) continue
 
     const dest = resolveNoteDestination(file, parsed.data.path)
-    
+
     // Remove private notes blocks from the content
     const filteredContent = removePrivateNotes(parsed.content)
     const filteredFileContent = matter.stringify(filteredContent, parsed.data)
-    
+
     await fs.promises.mkdir(path.dirname(dest), { recursive: true })
     await fs.promises.writeFile(dest, filteredFileContent, "utf8")
     publishedCount += 1
