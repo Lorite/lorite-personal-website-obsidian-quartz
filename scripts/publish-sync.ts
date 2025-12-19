@@ -102,6 +102,10 @@ function isAssetPath(p: string): boolean {
   return ASSET_EXTS.has(ext)
 }
 
+function removePrivateNotes(content: string): string {
+  return content.replace(/\n*{%\s*start_private_notes\s*%\}[\s\S]*?\{%\s*end_private_notes\s*%\}\n*/g, "")
+}
+
 function extractAssetRefsFromContent(contents: string): string[] {
   const refs = new Set<string>()
 
@@ -237,10 +241,27 @@ async function sync() {
     process.exit(1)
   }
 
+  // Collect .gitkeep files before cleaning
+  const gitkeepFiles: string[] = []
+  if (await pathExists(destRoot)) {
+    const allDest = await globby(["**/.gitkeep"], {
+      cwd: destRoot,
+      absolute: true,
+    })
+    gitkeepFiles.push(...allDest)
+  }
+
   if (argv.clean) {
     await fs.promises.rm(destRoot, { recursive: true, force: true })
   }
   await fs.promises.mkdir(destRoot, { recursive: true })
+
+  // Restore .gitkeep files
+  for (const gitkeepFile of gitkeepFiles) {
+    const dir = path.dirname(gitkeepFile)
+    await fs.promises.mkdir(dir, { recursive: true })
+    await fs.promises.writeFile(gitkeepFile, "")
+  }
 
   // Build ignore globs by merging CLI ignores with Quartz config ignorePatterns
   const cliIgnore = (argv.ignore as string[]) ?? []
@@ -266,7 +287,13 @@ async function sync() {
     if (!shouldPublish(parsed.data.publish)) continue
 
     const dest = resolveNoteDestination(file, parsed.data.path)
-    await copyFile(file, dest)
+    
+    // Remove private notes blocks from the content
+    const filteredContent = removePrivateNotes(parsed.content)
+    const filteredFileContent = matter.stringify(filteredContent, parsed.data)
+    
+    await fs.promises.mkdir(path.dirname(dest), { recursive: true })
+    await fs.promises.writeFile(dest, filteredFileContent, "utf8")
     publishedCount += 1
 
     // Auto-detect asset references from note content
