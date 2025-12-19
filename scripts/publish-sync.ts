@@ -252,7 +252,14 @@ async function sync() {
   }
 
   if (argv.clean) {
-    await fs.promises.rm(destRoot, { recursive: true, force: true })
+    // Keep the destination root to avoid breaking watchers; remove only contents
+    if (await pathExists(destRoot)) {
+      const entries = await fs.promises.readdir(destRoot, { withFileTypes: true })
+      for (const entry of entries) {
+        const target = path.join(destRoot, entry.name)
+        await fs.promises.rm(target, { recursive: true, force: true })
+      }
+    }
   }
   await fs.promises.mkdir(destRoot, { recursive: true })
 

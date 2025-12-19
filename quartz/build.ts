@@ -3,7 +3,7 @@ sourceMapSupport.install(options)
 import path from "path"
 import { PerfTimer } from "./util/perf"
 import { rm } from "fs/promises"
-import { GlobbyFilterFunction, isGitIgnored } from "globby"
+import { GlobbyFilterFunction } from "globby"
 import { styleText } from "util"
 import { parseMarkdown } from "./processors/parse"
 import { filterContent } from "./processors/filter"
@@ -120,7 +120,6 @@ async function startWatching(
     })
   }
 
-  const gitIgnoredMatcher = await isGitIgnored()
   const buildData: BuildData = {
     ctx,
     mut,
@@ -128,7 +127,6 @@ async function startWatching(
     ignored: (fp) => {
       const pathStr = toPosixPath(fp.toString())
       if (pathStr.startsWith(".git/")) return true
-      if (gitIgnoredMatcher(pathStr)) return true
       for (const pattern of cfg.configuration.ignorePatterns) {
         if (minimatch(pathStr, pattern)) {
           return true
@@ -146,27 +144,44 @@ async function startWatching(
     persistent: true,
     cwd: argv.directory,
     ignoreInitial: true,
+    usePolling: true,
+    interval: 300,
+    binaryInterval: 500,
+    awaitWriteFinish: {
+      stabilityThreshold: 200,
+      pollInterval: 100,
+    },
   })
 
   const changes: ChangeEvent[] = []
+  let debounce: NodeJS.Timeout | null = null
+
+  const scheduleRebuild = () => {
+    if (debounce) clearTimeout(debounce)
+    debounce = setTimeout(() => {
+      void rebuild(changes, clientRefresh, buildData)
+      debounce = null
+    }, 250)
+  }
+
   watcher
     .on("add", (fp) => {
       fp = toPosixPath(fp)
       if (buildData.ignored(fp)) return
       changes.push({ path: fp as FilePath, type: "add" })
-      void rebuild(changes, clientRefresh, buildData)
+      scheduleRebuild()
     })
     .on("change", (fp) => {
       fp = toPosixPath(fp)
       if (buildData.ignored(fp)) return
       changes.push({ path: fp as FilePath, type: "change" })
-      void rebuild(changes, clientRefresh, buildData)
+      scheduleRebuild()
     })
     .on("unlink", (fp) => {
       fp = toPosixPath(fp)
       if (buildData.ignored(fp)) return
       changes.push({ path: fp as FilePath, type: "delete" })
-      void rebuild(changes, clientRefresh, buildData)
+      scheduleRebuild()
     })
 
   return async () => {
