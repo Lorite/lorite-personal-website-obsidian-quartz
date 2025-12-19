@@ -11,5 +11,16 @@ footer {
     flex-direction: row;
     gap: 1rem;
     margin-top: -1rem;
+    flex-wrap: wrap;
+  }
+
+  & li a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  & li a i {
+    font-size: 1.1em;
   }
 }

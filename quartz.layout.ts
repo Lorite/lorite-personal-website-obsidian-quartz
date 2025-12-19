@@ -23,10 +23,24 @@ export const sharedPageComponents: SharedLayout = {
     }),
   ],
   footer: Component.Footer({
-    links: {
-      GitHub: "https://github.com/jackyzha0/quartz",
-      "Discord Community": "https://discord.gg/cRFFHYye7t",
-    },
+    name: "Alejandro Lorite Mora",
+    role: "Robotics PhD Student",
+    organization: { name: "IT University of Copenhagen", url: "https://www.itu.dk/" },
+    links: [
+      { text: "Email", href: "mailto:a.lorite.mora@gmail.com", icon: "fa-solid fa-envelope" },
+      {
+        text: "Google Scholar",
+        href: "https://scholar.google.es/citations?user=M5fEBD8AAAAJ&hl=en",
+        icon: "fa-solid fa-graduation-cap",
+      },
+      { text: "GitHub", href: "https://github.com/Lorite", icon: "fa-brands fa-github" },
+      {
+        text: "LinkedIn",
+        href: "https://www.linkedin.com/in/alejandro-lorite-mora",
+        icon: "fa-brands fa-linkedin",
+      },
+      { text: "X", href: "https://x.com/aloritemora", icon: "fa-brands fa-x-twitter" },
+    ],
   }),
 }
 
