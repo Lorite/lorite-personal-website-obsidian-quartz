@@ -8,6 +8,14 @@
 
 ## GitHub repository
 
+- Rebase the upstream v4 branch into your local v4 branch:
+
+  ```sh
+  git checkout preserve-dates
+  git fetch upstream
+  git rebase --committer-date-is-author-date upstream/v4
+  ```
+
 - From https://quartz.jzhao.xyz/setting-up-your-GitHub-repository
   - This is a helper command that will do the initial push of your content to your repository
 
