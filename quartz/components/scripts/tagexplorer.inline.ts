@@ -111,9 +111,21 @@ function createFolderNode(
 
   folderContainer.dataset.folderpath = folderPath
 
-  // Always use button for collapse behavior (tags are collapsible, not links)
-  const span = titleContainer.querySelector(".folder-title") as HTMLElement
-  span.textContent = node.displayName
+  // Tags should link to tag pages when behavior is "link"
+  const tagSlug = `tags/${folderPath}` as FullSlug
+
+  if (folderClickBehavior === "link") {
+    const button = titleContainer.querySelector(".folder-button") as HTMLElement
+    const a = document.createElement("a")
+    a.href = resolveRelative(currentSlug, tagSlug)
+    a.dataset.for = tagSlug
+    a.className = "folder-title"
+    a.textContent = node.displayName
+    button.replaceWith(a)
+  } else {
+    const span = titleContainer.querySelector(".folder-title") as HTMLElement
+    span.textContent = node.displayName
+  }
 
   // if this folder is a prefix of the current path we want to open it anyways
   const simpleFolderPath = simplifySlug(folderPath as FullSlug)
@@ -195,7 +207,7 @@ async function setupTagExplorer(currentSlug: FullSlug) {
       window.addCleanup(() => button.removeEventListener("click", toggleExplorer))
     }
 
-    // Set up folder click handlers - tags always use collapse behavior
+    // Set up folder click handlers (collapse behavior)
     const folderButtons = explorer.getElementsByClassName(
       "folder-button",
     ) as HTMLCollectionOf<HTMLElement>

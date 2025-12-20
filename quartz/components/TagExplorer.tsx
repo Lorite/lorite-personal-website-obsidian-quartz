@@ -11,7 +11,7 @@ import { concatenateResources } from "../util/resources"
 
 // Options interface defined in `TagExplorerNode` to avoid circular dependency
 const defaultOptions = {
-  folderClickBehavior: "collapse",
+  folderClickBehavior: "link",
   folderDefaultState: "collapsed",
   useSavedState: true,
   mapFn: (node: TagNode) => {
