@@ -478,14 +478,8 @@ async function sync() {
       if (n.mode === "external" && n.externalUrl) {
         lines.push(`- [${n.title}](${n.externalUrl})`)
       } else if (n.mode === "full") {
-        // Use absolute path from site root (/media/boardgames/note instead of ../../note)
-        const absPath =
-          "/" +
-          n.destPath
-            .replace(destRoot + "/", "")
-            .replace(/\\/g, "/")
-            .replace(/\.md$/i, "")
-        lines.push(`- [${n.title}](${absPath})`)
+        // Use wikilink format for full notes
+        lines.push(`- [[${n.title}]]`)
       } else {
         // title-only: show plain text entry
         lines.push(`- ${n.title}`)
@@ -526,14 +520,8 @@ async function sync() {
       if (n.mode === "external" && n.externalUrl) {
         lines.push(`- [${n.title}](${n.externalUrl})`)
       } else if (n.mode === "full") {
-        // Use absolute path from site root
-        const absPath =
-          "/" +
-          n.destPath
-            .replace(destRoot + "/", "")
-            .replace(/\\/g, "/")
-            .replace(/\.md$/i, "")
-        lines.push(`- [${n.title}](${absPath})`)
+        // Use wikilink format for full notes
+        lines.push(`- [[${n.title}]]`)
       } else {
         lines.push(`- ${n.title}`)
       }
