@@ -113,7 +113,7 @@ export const defaultListPageLayout: PageLayout = {
     }),
     Component.TagExplorer({
       title: "Tag Explorer",
-    })
+    }),
   ],
   right: [],
 }

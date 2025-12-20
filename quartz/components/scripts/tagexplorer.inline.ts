@@ -165,7 +165,7 @@ async function setupTagExplorer(currentSlug: FullSlug) {
     // Get folder state from local storage
     const storageTree = localStorage.getItem("tagExplorerTree")
     const serializedExplorerState = storageTree && useSavedState ? JSON.parse(storageTree) : []
-    
+
     currentExplorerState = serializedExplorerState
 
     const explorerUl = explorer.querySelector(".explorer-ul")
@@ -177,7 +177,7 @@ async function setupTagExplorer(currentSlug: FullSlug) {
       const isCollapsed =
         currentExplorerState.find((item) => item.path === child.name)?.collapsed ??
         folderDefaultState === "collapsed"
-      
+
       const node = child.isFile
         ? createFileNode(currentSlug, child)
         : createFolderNode(currentSlug, child, folderClickBehavior, child.name, isCollapsed)

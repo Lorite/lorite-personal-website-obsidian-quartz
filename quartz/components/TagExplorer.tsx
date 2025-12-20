@@ -76,14 +76,10 @@ export default ((userOpts?: Partial<Options>) => {
     }
   }
 
-  const TagExplorer: QuartzComponent = ({
-    cfg,
-    allFiles,
-    displayClass,
-  }: QuartzComponentProps) => {
+  const TagExplorer: QuartzComponent = ({ cfg, allFiles, displayClass }: QuartzComponentProps) => {
     constructFileTree(allFiles)
     const id = `explorer-${numExplorers++}`
-    
+
     // Serialize the tag tree to pass to client-side script
     const serializeTree = (node: TagNode): any => {
       return {
@@ -94,7 +90,7 @@ export default ((userOpts?: Partial<Options>) => {
         children: node.children.map(serializeTree),
       }
     }
-    
+
     const serializedTree = JSON.stringify(serializeTree(fileTree))
 
     return (
