@@ -68,7 +68,13 @@ export const defaultContentPageLayout: PageLayout = {
         { Component: Component.ReaderMode() },
       ],
     }),
-    Component.Explorer(),
+    Component.Explorer({
+      title: "Folder Explorer",
+      folderDefaultState: "collapsed",
+    }),
+    Component.TagExplorer({
+      title: "Tag Explorer",
+    }),
   ],
   right: [
     Component.Graph({

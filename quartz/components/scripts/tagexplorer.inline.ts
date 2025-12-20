@@ -1,17 +1,13 @@
-import { FileTrieNode } from "../../util/fileTrie"
 import { FullSlug, resolveRelative, simplifySlug } from "../../util/path"
-import { ContentDetails } from "../../plugins/emitters/contentIndex"
 
 type MaybeHTMLElement = HTMLElement | undefined
 
-interface ParsedOptions {
-  folderClickBehavior: "collapse" | "link"
-  folderDefaultState: "collapsed" | "open"
-  useSavedState: boolean
-  sortFn: (a: FileTrieNode, b: FileTrieNode) => number
-  filterFn: (node: FileTrieNode) => boolean
-  mapFn: (node: FileTrieNode) => void
-  order: "sort" | "filter" | "map"[]
+interface TagNodeData {
+  name: string
+  displayName: string
+  slug?: FullSlug
+  isFile: boolean
+  children: TagNodeData[]
 }
 
 type FolderState = {
@@ -20,6 +16,7 @@ type FolderState = {
 }
 
 let currentExplorerState: Array<FolderState>
+
 function toggleExplorer(this: HTMLElement) {
   const nearestExplorer = this.closest(".explorer") as HTMLElement
   if (!nearestExplorer) return
@@ -76,16 +73,18 @@ function toggleFolder(evt: MouseEvent) {
   }
 
   const stringifiedFileTree = JSON.stringify(currentExplorerState)
-  localStorage.setItem("fileTree", stringifiedFileTree)
+  localStorage.setItem("tagExplorerTree", stringifiedFileTree)
 }
 
-function createFileNode(currentSlug: FullSlug, node: FileTrieNode): HTMLLIElement {
-  const template = document.getElementById("template-file") as HTMLTemplateElement
+function createFileNode(currentSlug: FullSlug, node: TagNodeData): HTMLLIElement {
+  const template = document.getElementById("tag-template-file") as HTMLTemplateElement
   const clone = template.content.cloneNode(true) as DocumentFragment
   const li = clone.querySelector("li") as HTMLLIElement
   const a = li.querySelector("a") as HTMLAnchorElement
-  a.href = resolveRelative(currentSlug, node.slug)
-  a.dataset.for = node.slug
+  if (node.slug) {
+    a.href = resolveRelative(currentSlug, node.slug)
+    a.dataset.for = node.slug
+  }
   a.textContent = node.displayName
 
   if (currentSlug === node.slug) {
@@ -97,10 +96,12 @@ function createFileNode(currentSlug: FullSlug, node: FileTrieNode): HTMLLIElemen
 
 function createFolderNode(
   currentSlug: FullSlug,
-  node: FileTrieNode,
-  opts: ParsedOptions,
+  node: TagNodeData,
+  folderClickBehavior: "collapse" | "link",
+  folderPath: string,
+  isCollapsed: boolean,
 ): HTMLLIElement {
-  const template = document.getElementById("template-folder") as HTMLTemplateElement
+  const template = document.getElementById("tag-template-folder") as HTMLTemplateElement
   const clone = template.content.cloneNode(true) as DocumentFragment
   const li = clone.querySelector("li") as HTMLLIElement
   const folderContainer = li.querySelector(".folder-container") as HTMLElement
@@ -108,31 +109,14 @@ function createFolderNode(
   const folderOuter = li.querySelector(".folder-outer") as HTMLElement
   const ul = folderOuter.querySelector("ul") as HTMLUListElement
 
-  const folderPath = node.slug
   folderContainer.dataset.folderpath = folderPath
 
-  if (opts.folderClickBehavior === "link") {
-    // Replace button with link for link behavior
-    const button = titleContainer.querySelector(".folder-button") as HTMLElement
-    const a = document.createElement("a")
-    a.href = resolveRelative(currentSlug, folderPath)
-    a.dataset.for = folderPath
-    a.className = "folder-title"
-    a.textContent = node.displayName
-    button.replaceWith(a)
-  } else {
-    const span = titleContainer.querySelector(".folder-title") as HTMLElement
-    span.textContent = node.displayName
-  }
+  // Always use button for collapse behavior (tags are collapsible, not links)
+  const span = titleContainer.querySelector(".folder-title") as HTMLElement
+  span.textContent = node.displayName
 
-  // if the saved state is collapsed or the default state is collapsed
-  const isCollapsed =
-    currentExplorerState.find((item) => item.path === folderPath)?.collapsed ??
-    opts.folderDefaultState === "collapsed"
-
-  // if this folder is a prefix of the current path we
-  // want to open it anyways
-  const simpleFolderPath = simplifySlug(folderPath)
+  // if this folder is a prefix of the current path we want to open it anyways
+  const simpleFolderPath = simplifySlug(folderPath as FullSlug)
   const folderIsPrefixOfCurrentSlug =
     simpleFolderPath === currentSlug.slice(0, simpleFolderPath.length)
 
@@ -141,85 +125,57 @@ function createFolderNode(
   }
 
   for (const child of node.children) {
-    const childNode = child.isFolder
-      ? createFolderNode(currentSlug, child, opts)
-      : createFileNode(currentSlug, child)
+    const childPath = folderPath ? `${folderPath}/${child.name}` : child.name
+    const childNode = child.isFile
+      ? createFileNode(currentSlug, child)
+      : createFolderNode(
+          currentSlug,
+          child,
+          folderClickBehavior,
+          childPath,
+          currentExplorerState.find((item) => item.path === childPath)?.collapsed ?? isCollapsed,
+        )
     ul.appendChild(childNode)
   }
 
   return li
 }
 
-async function setupExplorer(currentSlug: FullSlug) {
-  const allExplorers = document.querySelectorAll(
-    "div.explorer:not(.tag-explorer)",
-  ) as NodeListOf<HTMLElement>
+async function setupTagExplorer(currentSlug: FullSlug) {
+  const allExplorers = document.querySelectorAll("div.tag-explorer") as NodeListOf<HTMLElement>
 
   for (const explorer of allExplorers) {
-    const dataFns = JSON.parse(explorer.dataset.dataFns || "{}")
-    const opts: ParsedOptions = {
-      folderClickBehavior: (explorer.dataset.behavior || "collapse") as "collapse" | "link",
-      folderDefaultState: (explorer.dataset.collapsed || "collapsed") as "collapsed" | "open",
-      useSavedState: explorer.dataset.savestate === "true",
-      order: dataFns.order || ["filter", "map", "sort"],
-      sortFn: new Function("return " + (dataFns.sortFn || "undefined"))(),
-      filterFn: new Function("return " + (dataFns.filterFn || "undefined"))(),
-      mapFn: new Function("return " + (dataFns.mapFn || "undefined"))(),
-    }
+    const folderClickBehavior = (explorer.dataset.behavior || "link") as "collapse" | "link"
+    const folderDefaultState = (explorer.dataset.collapsed || "collapsed") as "collapsed" | "open"
+    const useSavedState = explorer.dataset.savestate === "true"
+    const treeData = JSON.parse(explorer.dataset.tree || "{}")
 
     // Get folder state from local storage
-    const storageTree = localStorage.getItem("fileTree")
-    const serializedExplorerState = storageTree && opts.useSavedState ? JSON.parse(storageTree) : []
-    const oldIndex = new Map<string, boolean>(
-      serializedExplorerState.map((entry: FolderState) => [entry.path, entry.collapsed]),
-    )
-
-    const data = await fetchData
-    const entries = [...Object.entries(data)] as [FullSlug, ContentDetails][]
-    const trie = FileTrieNode.fromEntries(entries)
-
-    // Apply functions in order
-    for (const fn of opts.order) {
-      switch (fn) {
-        case "filter":
-          if (opts.filterFn) trie.filter(opts.filterFn)
-          break
-        case "map":
-          if (opts.mapFn) trie.map(opts.mapFn)
-          break
-        case "sort":
-          if (opts.sortFn) trie.sort(opts.sortFn)
-          break
-      }
-    }
-
-    // Get folder paths for state management
-    const folderPaths = trie.getFolderPaths()
-    currentExplorerState = folderPaths.map((path) => {
-      const previousState = oldIndex.get(path)
-      return {
-        path,
-        collapsed:
-          previousState === undefined ? opts.folderDefaultState === "collapsed" : previousState,
-      }
-    })
+    const storageTree = localStorage.getItem("tagExplorerTree")
+    const serializedExplorerState = storageTree && useSavedState ? JSON.parse(storageTree) : []
+    
+    currentExplorerState = serializedExplorerState
 
     const explorerUl = explorer.querySelector(".explorer-ul")
     if (!explorerUl) continue
 
-    // Create and insert new content
+    // Create and insert new content from the server-provided tree
     const fragment = document.createDocumentFragment()
-    for (const child of trie.children) {
-      const node = child.isFolder
-        ? createFolderNode(currentSlug, child, opts)
-        : createFileNode(currentSlug, child)
+    for (const child of treeData.children || []) {
+      const isCollapsed =
+        currentExplorerState.find((item) => item.path === child.name)?.collapsed ??
+        folderDefaultState === "collapsed"
+      
+      const node = child.isFile
+        ? createFileNode(currentSlug, child)
+        : createFolderNode(currentSlug, child, folderClickBehavior, child.name, isCollapsed)
 
       fragment.appendChild(node)
     }
     explorerUl.insertBefore(fragment, explorerUl.firstChild)
 
     // restore explorer scrollTop position if it exists
-    const scrollTop = sessionStorage.getItem("explorerScrollTop")
+    const scrollTop = sessionStorage.getItem("tagExplorerScrollTop")
     if (scrollTop) {
       explorerUl.scrollTop = parseInt(scrollTop)
     } else {
@@ -239,15 +195,13 @@ async function setupExplorer(currentSlug: FullSlug) {
       window.addCleanup(() => button.removeEventListener("click", toggleExplorer))
     }
 
-    // Set up folder click handlers
-    if (opts.folderClickBehavior === "collapse") {
-      const folderButtons = explorer.getElementsByClassName(
-        "folder-button",
-      ) as HTMLCollectionOf<HTMLElement>
-      for (const button of folderButtons) {
-        button.addEventListener("click", toggleFolder)
-        window.addCleanup(() => button.removeEventListener("click", toggleFolder))
-      }
+    // Set up folder click handlers - tags always use collapse behavior
+    const folderButtons = explorer.getElementsByClassName(
+      "folder-button",
+    ) as HTMLCollectionOf<HTMLElement>
+    for (const button of folderButtons) {
+      button.addEventListener("click", toggleFolder)
+      window.addCleanup(() => button.removeEventListener("click", toggleFolder))
     }
 
     const folderIcons = explorer.getElementsByClassName(
@@ -261,20 +215,18 @@ async function setupExplorer(currentSlug: FullSlug) {
 }
 
 document.addEventListener("prenav", async () => {
-  // save explorer scrollTop position (folder explorer only)
-  const explorer = document.querySelector(
-    ".explorer:not(.tag-explorer) .explorer-ul",
-  ) as HTMLElement | null
+  // save explorer scrollTop position
+  const explorer = document.querySelector(".tag-explorer .explorer-ul")
   if (!explorer) return
-  sessionStorage.setItem("explorerScrollTop", explorer.scrollTop.toString())
+  sessionStorage.setItem("tagExplorerScrollTop", explorer.scrollTop.toString())
 })
 
 document.addEventListener("nav", async (e: CustomEventMap["nav"]) => {
   const currentSlug = e.detail.url
-  await setupExplorer(currentSlug)
+  await setupTagExplorer(currentSlug)
 
   // if mobile hamburger is visible, collapse by default
-  for (const explorer of document.querySelectorAll(".explorer:not(.tag-explorer)")) {
+  for (const explorer of document.getElementsByClassName("tag-explorer")) {
     const mobileExplorer = explorer.querySelector(".mobile-explorer")
     if (!mobileExplorer) return
 
@@ -293,7 +245,7 @@ document.addEventListener("nav", async (e: CustomEventMap["nav"]) => {
 window.addEventListener("resize", function () {
   // Desktop explorer opens by default, and it stays open when the window is resized
   // to mobile screen size. Applies `no-scroll` to <html> in this edge case.
-  const explorer = document.querySelector(".explorer:not(.tag-explorer)")
+  const explorer = document.querySelector(".tag-explorer")
   if (explorer && !explorer.classList.contains("collapsed")) {
     document.documentElement.classList.add("mobile-no-scroll")
     return
