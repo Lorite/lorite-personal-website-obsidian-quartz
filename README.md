@@ -6,6 +6,10 @@
 - Start the development server (run once): `docker run --rm -it -p 8080:8080 -p 3001:3001 -v ./content:/usr/src/app/content $(docker build -q -t quartz-dev -f Dockerfile.dev .)`
 - Open your browser to `http://localhost:8080` to preview the site.
 
+## Frontmatter Properties
+
+- Check [Frontmatter](https://quartz.jzhao.xyz/plugins/Frontmatter)
+
 ## GitHub repository
 
 - Rebase the upstream v4 branch into your local v4 branch:
@@ -36,6 +40,59 @@
 > - `--commit` or `--no-commit`: whether to make a `git` commit for your changes
 > - `--push` or `--no-push`: whether to push updates to your GitHub fork of Quartz
 > - `--pull` or `--no-pull`: whether to try and pull in any updates from your GitHub fork (i.e. from other devices) before pushing
+
+## Private Notes and Partial Notes
+
+- I created a npm function `publish:sync` so that only the notes with the frontmatter property `publish: true` will be copied to the content folder in the quartz repository.
+- I also use a specific syntax inside the notes to tell the parser to not copy the text in between.
+  {% start_private_notes %}
+  This is how
+  {% end_private_notes %}
+
+## Collections and Publishing Modes
+
+The sync script supports **collection folders** that auto-generate indexes for media consumption tracking (movies, books, games, etc.).
+
+### Collection Setup
+
+Add `collectionIndexOnly: true` to a folder's `index.md` frontmatter to enable collection behavior:
+
+```yaml
+---
+title: Movies
+publish: true
+collectionIndexOnly: true
+---
+```
+
+- **Nested folders inherit collection behavior** — items in `media/videogames/pokemon/` roll up into `media/videogames/`'s index.
+- **Auto-generated indexes** — both folder (`media/movies/index.md`) and tag pages (`tags/movies.md`) are created with sorted lists.
+- **Wikilink format** — full notes use `[[Title]]`, folder indexes use `[[path/to/folder/]]`.
+
+### Publishing Modes
+
+Control how individual notes appear in indexes using `publish_mode`:
+
+```yaml
+---
+title: The Matrix
+publish: true
+publish_mode: full # or 'title' or 'external'
+updated: 2024-12-20
+---
+```
+
+- **`full` (default)** — Note is published and linked with wikilink `[[Title]]` in indexes.
+- **`title`** — Note is **not published**; appears as plain text in indexes (for items without detailed notes).
+- **`external`** — Note is **not published**; appears as external link using `url` property (for items tracked elsewhere):
+  ```yaml
+  publish_mode: external
+  url: https://example.com/item
+  ```
+
+### Sorting
+
+All collection indexes sort items **newest to oldest** based on the `updated` frontmatter property.
 
 # Quartz v4
 
