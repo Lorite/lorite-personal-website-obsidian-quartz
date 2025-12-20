@@ -238,6 +238,34 @@ async function loadQuartzIgnorePatterns(): Promise<string[]> {
   }
 }
 
+// Load folders that opt into collection index-only behavior via frontmatter in their source index.md
+async function loadCollectionFolders(sourceRoot: string, ignoreGlobs: string[]): Promise<Set<string>> {
+  const collection = new Set<string>()
+  const indexFiles = await globby(["**/index.md"], {
+    cwd: sourceRoot,
+    absolute: true,
+    ignore: ignoreGlobs,
+  })
+  for (const fp of indexFiles) {
+    try {
+      const raw = await fs.promises.readFile(fp, "utf8")
+      const parsed = matter(raw)
+      const fm = parsed.data as Record<string, unknown>
+      const isCollection =
+        fm.collectionIndexOnly === true ||
+        fm.collectionIndexOnly === "true" ||
+        fm.collection === "index-only"
+      if (isCollection) {
+        const relFolder = path.dirname(path.relative(sourceRoot, fp)).replace(/\\/g, "/")
+        collection.add(relFolder)
+      }
+    } catch (e) {
+      console.warn(`⚠️  Failed to read index.md for collection check: ${fp}`, (e as Error).message)
+    }
+  }
+  return collection
+}
+
 async function sync() {
   if (!(await pathExists(sourceRoot))) {
     console.error(`Source folder '${sourceRoot}' does not exist.`)
@@ -280,6 +308,9 @@ async function sync() {
     new Set([...expandIgnorePatterns(cliIgnore), ...expandIgnorePatterns(quartzIgnores)]),
   )
 
+  // Folders that opt into index-only behavior
+  const collectionFolders = await loadCollectionFolders(sourceRoot, ignoreGlobs)
+
   const markdownFiles = await globby(["**/*.md"], {
     cwd: sourceRoot,
     absolute: true,
@@ -289,6 +320,22 @@ async function sync() {
   let publishedCount = 0
   let assetCount = 0
   const assetsToCopy = new Map<string, string>()
+  let folderIndexCount = 0
+  let folderIndexItemsTotal = 0
+  let tagIndexCount = 0
+  let tagIndexItemsTotal = 0
+
+  type NoteMeta = {
+    title: string
+    destPath: string
+    folderRel: string
+    srcFolderRel: string
+    mode: "full" | "title" | "external"
+    externalUrl?: string
+    updatedTS: number
+  }
+  const folderNotes = new Map<string, NoteMeta[]>()
+  const tagNotes = new Map<string, NoteMeta[]>()
 
   for (const file of markdownFiles) {
     const contents = await fs.promises.readFile(file, "utf8")
@@ -296,24 +343,69 @@ async function sync() {
 
     if (!shouldPublish(parsed.data.publish)) continue
 
-    const dest = resolveNoteDestination(file, parsed.data.path)
+    const mode: "full" | "title" | "external" = (parsed.data.publish_mode as any) ?? "full"
+    const externalUrl = typeof parsed.data.url === "string" ? parsed.data.url : undefined
 
-    // Remove private notes blocks from the content
-    const filteredContent = removePrivateNotes(parsed.content)
-    const filteredFileContent = matter.stringify(filteredContent, parsed.data)
+    const dest = resolveNoteDestination(file, parsed.data.path)
+    const title = (parsed.data.title as string) ?? path.parse(file).name
+    const updatedRaw = (parsed.data.updated as unknown) ?? null
+    let updatedTS = 0
+    if (typeof updatedRaw === "string") {
+      const t = Date.parse(updatedRaw)
+      updatedTS = Number.isNaN(t) ? 0 : t
+    } else if (updatedRaw instanceof Date) {
+      const t = updatedRaw.getTime()
+      updatedTS = Number.isNaN(t) ? 0 : t
+    } else if (typeof updatedRaw === "number") {
+      updatedTS = updatedRaw
+    }
+
+    // Record metadata for folder index generation
+    const folderRel = path.dirname(path.relative(destRoot, dest)).replace(/\\/g, "/")
+    const srcFolderRel = path.dirname(path.relative(sourceRoot, file)).replace(/\\/g, "/")
+    const meta: NoteMeta = { title, destPath: dest, folderRel, srcFolderRel, mode, externalUrl, updatedTS }
+    const arr = folderNotes.get(folderRel) ?? []
+    arr.push(meta)
+    folderNotes.set(folderRel, arr)
 
     await fs.promises.mkdir(path.dirname(dest), { recursive: true })
-    await fs.promises.writeFile(dest, filteredFileContent, "utf8")
-    publishedCount += 1
 
-    // Auto-detect asset references from note content
-    const detectedRefs = extractAssetRefsFromContent(contents)
-    for (const assetRef of detectedRefs) {
-      const resolved = await resolveAssetPath(assetRef, ignoreGlobs)
-      if (!resolved) continue
-      const destPath = path.join(destAssetRoot, assetRef)
-      assetsToCopy.set(resolved, destPath)
+    const isCollectionFolder = collectionFolders.has(srcFolderRel)
+
+    if (mode === "full" || !isCollectionFolder) {
+      // Remove private notes blocks from the content
+      const filteredContent = removePrivateNotes(parsed.content)
+      const filteredFileContent = matter.stringify(filteredContent, parsed.data)
+      await fs.promises.writeFile(dest, filteredFileContent, "utf8")
+      publishedCount += 1
+    } else {
+      // Do not create a note file for title/external modes
     }
+
+    // Auto-detect asset references from note content (only for full mode)
+    if (mode === "full") {
+      const detectedRefs = extractAssetRefsFromContent(contents)
+      for (const assetRef of detectedRefs) {
+        const resolved = await resolveAssetPath(assetRef, ignoreGlobs)
+        if (!resolved) continue
+        const destPath = path.join(destAssetRoot, assetRef)
+        assetsToCopy.set(resolved, destPath)
+      }
+    }
+
+    // For tag index generation: only use the last folder segment as the canonical tag
+    const folderSegs = folderRel.split("/").filter(Boolean)
+    const canonicalTag = folderSegs.length > 0 ? folderSegs[folderSegs.length - 1] : ""
+    if (canonicalTag && isCollectionFolder) {
+      // Exclude folder index.md from tag aggregation to keep counts aligned
+      if (path.basename(dest).toLowerCase() !== "index.md") {
+        const arrT = tagNotes.get(canonicalTag) ?? []
+        arrT.push(meta)
+        tagNotes.set(canonicalTag, arrT)
+      }
+    }
+
+    // (Removed) Do not add all frontmatter tags to tagNotes — we only use canonicalTag
   }
 
   for (const [src, dest] of assetsToCopy.entries()) {
@@ -322,8 +414,98 @@ async function sync() {
   }
 
   console.log(
-    `Copied ${publishedCount} publish:true notes and ${assetCount} referenced assets into ${destRoot}`,
+    `📄 Copied ${publishedCount} publish:true notes and ${assetCount} referenced assets into ${destRoot}`,
   )
+
+  // Generate index.md for each folder with published items if none exists
+  for (const [folderRel, notes] of folderNotes.entries()) {
+    const folderDir = path.join(destRoot, folderRel)
+    const indexPath = path.join(folderDir, "index.md")
+    // Only generate index for folders that opt into collection behavior
+    const shouldGenerate = notes.some((n) => collectionFolders.has(n.srcFolderRel))
+    if (!shouldGenerate) continue
+
+    // Title: use last path segment or root name
+    const segments = folderRel.split("/").filter(Boolean)
+    const title = segments.length > 0 ? segments[segments.length - 1] : "Index"
+
+    // Build markdown list
+    const lines: string[] = []
+    lines.push(`List of ${title.toLowerCase()} I have consumed from newest to oldest:`)
+    lines.push("")
+    // Sort notes newest-to-oldest by 'updated' frontmatter
+    const sortedNotes = notes.slice().sort((a, b) => (b.updatedTS || 0) - (a.updatedTS || 0))
+    const listNotes = sortedNotes.filter(
+      (n) => path.normalize(n.destPath).toLowerCase() !== path.normalize(indexPath).toLowerCase(),
+    )
+    for (const n of listNotes) {
+      if (n.mode === "external" && n.externalUrl) {
+        lines.push(`- [${n.title}](${n.externalUrl})`)
+      } else if (n.mode === "full") {
+        // relative link to note without .md extension
+        const rel = path.relative(folderDir, n.destPath).replace(/\\/g, "/").replace(/\.md$/i, "")
+        lines.push(`- [${n.title}](${rel})`)
+      } else {
+        // title-only: show plain text entry
+        lines.push(`- ${n.title}`)
+      }
+    }
+
+    const content = lines.join("\n")
+    const fm = { title, publish: true }
+    const fileOut = matter.stringify(content, fm)
+    await fs.promises.mkdir(folderDir, { recursive: true })
+    await fs.promises.writeFile(indexPath, fileOut, "utf8")
+    folderIndexCount += 1
+    folderIndexItemsTotal += listNotes.length
+    console.log(`📁 Created folder index '${folderRel}' with ${listNotes.length} items`)
+  }
+
+  // (Removed) Old tag page generation using each frontmatter tag
+
+  // Generate tag pages (tags/<tag>.md) with lists using canonical last-folder tag
+  for (const [tagName, notes] of tagNotes.entries()) {
+    const tagFilePath = path.join(destRoot, "tags", `${tagName}.md`)
+    const tagDir = path.dirname(tagFilePath)
+    const hasTagFile = await pathExists(tagFilePath)
+    if (hasTagFile) continue
+
+    const title = tagName
+    
+    const lines: string[] = []
+    lines.push(`List of ${tagName.toLowerCase()} I have consumed from newest to oldest:`)
+    lines.push("")
+    // Sort notes newest-to-oldest by 'updated' frontmatter
+    const sortedNotes = notes.slice().sort((a, b) => (b.updatedTS || 0) - (a.updatedTS || 0))
+    // Exclude any folder index.md entries
+    const listNotes = sortedNotes.filter((n) => path.basename(n.destPath).toLowerCase() !== "index.md")
+    for (const n of listNotes) {
+      if (n.mode === "external" && n.externalUrl) {
+        lines.push(`- [${n.title}](${n.externalUrl})`)
+      } else if (n.mode === "full") {
+        const rel = path
+          .relative(tagDir, n.destPath)
+          .replace(/\\/g, "/")
+          .replace(/\.md$/i, "")
+        lines.push(`- [${n.title}](${rel})`)
+      } else {
+        lines.push(`- ${n.title}`)
+      }
+    }
+
+    const content = lines.join("\n")
+    const fm = { title, publish: true, tags: [tagName] }
+    const fileOut = matter.stringify(content, fm)
+    await fs.promises.mkdir(tagDir, { recursive: true })
+    await fs.promises.writeFile(tagFilePath, fileOut, "utf8")
+    tagIndexCount += 1
+    tagIndexItemsTotal += listNotes.length
+    console.log(`🏷️ Created tag page '${tagName}' with ${listNotes.length} items`)
+  }
+
+  // Summary logs
+  console.log(`📁 Folder indexes created: ${folderIndexCount} (total items: ${folderIndexItemsTotal})`)
+  console.log(`🏷️ Tag pages created: ${tagIndexCount} (total items: ${tagIndexItemsTotal})`)
 }
 
 sync().catch((err) => {
