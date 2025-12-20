@@ -433,9 +433,13 @@ async function sync() {
     if (canonicalTag && isCollectionFolder) {
       // Exclude folder index.md from tag aggregation to keep counts aligned
       if (path.basename(dest).toLowerCase() !== "index.md") {
-        const arrT = tagNotes.get(canonicalTag) ?? []
+        // Use the collection root's last segment as the tag, not the nested folder's
+        const tagToUse = collectionRoot
+          ? collectionRoot.split("/").pop() || canonicalTag
+          : canonicalTag
+        const arrT = tagNotes.get(tagToUse) ?? []
         arrT.push(meta)
-        tagNotes.set(canonicalTag, arrT)
+        tagNotes.set(tagToUse, arrT)
       }
     }
 
