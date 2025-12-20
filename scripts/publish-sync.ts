@@ -280,6 +280,68 @@ function isInCollection(folderPath: string, collectionFolders: Set<string>): str
   return null
 }
 
+// Generate collection index (folder or tag) with list of notes
+type NoteMeta = {
+  title: string
+  destPath: string
+  folderRel: string
+  srcFolderRel: string
+  mode: "full" | "title" | "external"
+  externalUrl?: string
+  updatedTS: number
+  collectionRoot?: string
+}
+
+async function generateCollectionIndex(
+  indexPath: string,
+  indexDir: string,
+  title: string,
+  notes: NoteMeta[],
+  filterIndexPath?: string,
+  frontmatterExtra?: Record<string, unknown>,
+): Promise<number> {
+  // Sort notes newest-to-oldest by 'updated' frontmatter
+  const sortedNotes = notes.slice().sort((a, b) => (b.updatedTS || 0) - (a.updatedTS || 0))
+
+  // Filter out index.md if path specified, or by basename
+  const listNotes = filterIndexPath
+    ? sortedNotes.filter(
+        (n) =>
+          path.normalize(n.destPath).toLowerCase() !==
+          path.normalize(filterIndexPath).toLowerCase(),
+      )
+    : sortedNotes.filter((n) => path.basename(n.destPath).toLowerCase() !== "index.md")
+
+  // Build markdown list
+  const lines: string[] = []
+  lines.push(`List of ${title.toLowerCase()} I have consumed from newest to oldest:`)
+  lines.push("")
+  for (const n of listNotes) {
+    if (n.mode === "external" && n.externalUrl) {
+      lines.push(`- [${n.title}](${n.externalUrl})`)
+    } else if (n.mode === "full") {
+      // For index.md files, use folder path; otherwise use title
+      if (path.basename(n.destPath).toLowerCase() === "index.md") {
+        const folderPath = n.folderRel.replace(/\\/g, "/")
+        lines.push(`- [[${folderPath}/]]`)
+      } else {
+        lines.push(`- [[${n.title}]]`)
+      }
+    } else {
+      // title-only: show plain text entry
+      lines.push(`- ${n.title}`)
+    }
+  }
+
+  const content = lines.join("\n")
+  const fm = { title, publish: true, ...frontmatterExtra }
+  const fileOut = matter.stringify(content, fm)
+  await fs.promises.mkdir(indexDir, { recursive: true })
+  await fs.promises.writeFile(indexPath, fileOut, "utf8")
+
+  return listNotes.length
+}
+
 async function sync() {
   if (!(await pathExists(sourceRoot))) {
     console.error(`Source folder '${sourceRoot}' does not exist.`)
@@ -339,16 +401,6 @@ async function sync() {
   let tagIndexCount = 0
   let tagIndexItemsTotal = 0
 
-  type NoteMeta = {
-    title: string
-    destPath: string
-    folderRel: string
-    srcFolderRel: string
-    mode: "full" | "title" | "external"
-    externalUrl?: string
-    updatedTS: number
-    collectionRoot?: string
-  }
   const folderNotes = new Map<string, NoteMeta[]>()
   const tagNotes = new Map<string, NoteMeta[]>()
 
@@ -455,90 +507,42 @@ async function sync() {
     `📄 Copied ${publishedCount} publish:true notes and ${assetCount} referenced assets into ${destRoot}`,
   )
 
-  // Generate index.md for each folder with published items if none exists
+  // Generate folder indexes for collection folders
   for (const [folderRel, notes] of folderNotes.entries()) {
-    const folderDir = path.join(destRoot, folderRel)
-    const indexPath = path.join(folderDir, "index.md")
-    // Only generate index for folders that opt into collection behavior
     const shouldGenerate = notes.some(
       (n) => isInCollection(n.srcFolderRel, collectionFolders) !== null,
     )
     if (!shouldGenerate) continue
 
-    // Title: use last path segment or root name
+    const folderDir = path.join(destRoot, folderRel)
+    const indexPath = path.join(folderDir, "index.md")
     const segments = folderRel.split("/").filter(Boolean)
     const title = segments.length > 0 ? segments[segments.length - 1] : "Index"
 
-    // Build markdown list
-    const lines: string[] = []
-    lines.push(`List of ${title.toLowerCase()} I have consumed from newest to oldest:`)
-    lines.push("")
-    // Sort notes newest-to-oldest by 'updated' frontmatter
-    const sortedNotes = notes.slice().sort((a, b) => (b.updatedTS || 0) - (a.updatedTS || 0))
-    const listNotes = sortedNotes.filter(
-      (n) => path.normalize(n.destPath).toLowerCase() !== path.normalize(indexPath).toLowerCase(),
-    )
-    for (const n of listNotes) {
-      if (n.mode === "external" && n.externalUrl) {
-        lines.push(`- [${n.title}](${n.externalUrl})`)
-      } else if (n.mode === "full") {
-        // Use wikilink format for full notes
-        lines.push(`- [[${n.title}]]`)
-      } else {
-        // title-only: show plain text entry
-        lines.push(`- ${n.title}`)
-      }
-    }
-
-    const content = lines.join("\n")
-    const fm = { title, publish: true }
-    const fileOut = matter.stringify(content, fm)
-    await fs.promises.mkdir(folderDir, { recursive: true })
-    await fs.promises.writeFile(indexPath, fileOut, "utf8")
+    const itemCount = await generateCollectionIndex(indexPath, folderDir, title, notes, indexPath)
     folderIndexCount += 1
-    folderIndexItemsTotal += listNotes.length
-    console.log(`📁 Created folder index '${folderRel}' with ${listNotes.length} items`)
+    folderIndexItemsTotal += itemCount
+    console.log(`📁 Created folder index '${folderRel}' with ${itemCount} items`)
   }
 
-  // (Removed) Old tag page generation using each frontmatter tag
-
-  // Generate tag pages (tags/<tag>.md) with lists using canonical last-folder tag
+  // Generate tag pages for collection tags
   for (const [tagName, notes] of tagNotes.entries()) {
     const tagFilePath = path.join(destRoot, "tags", `${tagName}.md`)
-    const tagDir = path.dirname(tagFilePath)
     const hasTagFile = await pathExists(tagFilePath)
     if (hasTagFile) continue
 
-    const title = tagName
-
-    const lines: string[] = []
-    lines.push(`List of ${tagName.toLowerCase()} I have consumed from newest to oldest:`)
-    lines.push("")
-    // Sort notes newest-to-oldest by 'updated' frontmatter
-    const sortedNotes = notes.slice().sort((a, b) => (b.updatedTS || 0) - (a.updatedTS || 0))
-    // Exclude any folder index.md entries
-    const listNotes = sortedNotes.filter(
-      (n) => path.basename(n.destPath).toLowerCase() !== "index.md",
+    const tagDir = path.dirname(tagFilePath)
+    const itemCount = await generateCollectionIndex(
+      tagFilePath,
+      tagDir,
+      tagName,
+      notes,
+      undefined,
+      { tags: [tagName] },
     )
-    for (const n of listNotes) {
-      if (n.mode === "external" && n.externalUrl) {
-        lines.push(`- [${n.title}](${n.externalUrl})`)
-      } else if (n.mode === "full") {
-        // Use wikilink format for full notes
-        lines.push(`- [[${n.title}]]`)
-      } else {
-        lines.push(`- ${n.title}`)
-      }
-    }
-
-    const content = lines.join("\n")
-    const fm = { title, publish: true, tags: [tagName] }
-    const fileOut = matter.stringify(content, fm)
-    await fs.promises.mkdir(tagDir, { recursive: true })
-    await fs.promises.writeFile(tagFilePath, fileOut, "utf8")
     tagIndexCount += 1
-    tagIndexItemsTotal += listNotes.length
-    console.log(`🏷️ Created tag page '${tagName}' with ${listNotes.length} items`)
+    tagIndexItemsTotal += itemCount
+    console.log(`🏷️ Created tag page '${tagName}' with ${itemCount} items`)
   }
 
   // Summary logs
