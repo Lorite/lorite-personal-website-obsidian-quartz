@@ -5,23 +5,7 @@ import * as Component from "./quartz/components"
 export const sharedPageComponents: SharedLayout = {
   head: Component.Head(),
   header: [],
-  afterBody: [
-    Component.Comments({
-      provider: "giscus",
-      options: {
-        // from data-repo
-        repo: "Lorite/lorite-personal-website-obsidian-quartz",
-        // from data-repo-id
-        repoId: "R_kgDOQpBfoQ",
-        // from data-category
-        category: "Announcements",
-        // from data-category-id
-        categoryId: "DIC_kwDOQpBfoc4C0BmP",
-        // from data-lang
-        lang: "en",
-      },
-    }),
-  ],
+  afterBody: [],
   footer: Component.Footer({
     name: "Alejandro Lorite Mora",
     role: "Robotics PhD Student",
@@ -54,6 +38,23 @@ export const defaultContentPageLayout: PageLayout = {
     Component.ArticleTitle(),
     Component.ContentMeta(),
     Component.TagList(),
+  ],
+  afterBody: [
+    Component.Comments({
+      provider: "giscus",
+      options: {
+        // from data-repo
+        repo: "Lorite/lorite-personal-website-obsidian-quartz",
+        // from data-repo-id
+        repoId: "R_kgDOQpBfoQ",
+        // from data-category
+        category: "Announcements",
+        // from data-category-id
+        categoryId: "DIC_kwDOQpBfoc4C0BmP",
+        // from data-lang
+        lang: "en",
+      },
+    }),
   ],
   left: [
     Component.PageTitle(),
@@ -106,7 +107,13 @@ export const defaultListPageLayout: PageLayout = {
         { Component: Component.Darkmode() },
       ],
     }),
-    Component.Explorer(),
+    Component.Explorer({
+      title: "Folder Explorer",
+      folderDefaultState: "collapsed",
+    }),
+    Component.TagExplorer({
+      title: "Tag Explorer",
+    })
   ],
   right: [],
 }
