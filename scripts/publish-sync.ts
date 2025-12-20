@@ -239,7 +239,10 @@ async function loadQuartzIgnorePatterns(): Promise<string[]> {
 }
 
 // Load folders that opt into collection index-only behavior via frontmatter in their source index.md
-async function loadCollectionFolders(sourceRoot: string, ignoreGlobs: string[]): Promise<Set<string>> {
+async function loadCollectionFolders(
+  sourceRoot: string,
+  ignoreGlobs: string[],
+): Promise<Set<string>> {
   const collection = new Set<string>()
   const indexFiles = await globby(["**/index.md"], {
     cwd: sourceRoot,
@@ -264,6 +267,17 @@ async function loadCollectionFolders(sourceRoot: string, ignoreGlobs: string[]):
     }
   }
   return collection
+}
+
+// Check if a folder belongs to a collection (either directly or as a subfolder)
+function isInCollection(folderPath: string, collectionFolders: Set<string>): string | null {
+  for (const collFolder of collectionFolders) {
+    // Direct match
+    if (folderPath === collFolder) return collFolder
+    // Subfolder match: folderPath starts with collFolder followed by /
+    if (folderPath.startsWith(collFolder + "/")) return collFolder
+  }
+  return null
 }
 
 async function sync() {
@@ -333,6 +347,7 @@ async function sync() {
     mode: "full" | "title" | "external"
     externalUrl?: string
     updatedTS: number
+    collectionRoot?: string
   }
   const folderNotes = new Map<string, NoteMeta[]>()
   const tagNotes = new Map<string, NoteMeta[]>()
@@ -363,14 +378,33 @@ async function sync() {
     // Record metadata for folder index generation
     const folderRel = path.dirname(path.relative(destRoot, dest)).replace(/\\/g, "/")
     const srcFolderRel = path.dirname(path.relative(sourceRoot, file)).replace(/\\/g, "/")
-    const meta: NoteMeta = { title, destPath: dest, folderRel, srcFolderRel, mode, externalUrl, updatedTS }
+    const collectionRoot = isInCollection(srcFolderRel, collectionFolders)
+    const meta: NoteMeta = {
+      title,
+      destPath: dest,
+      folderRel,
+      srcFolderRel,
+      mode,
+      externalUrl,
+      updatedTS,
+      collectionRoot: collectionRoot || undefined,
+    }
+
+    // Add to both the actual folder and the collection root (if different)
     const arr = folderNotes.get(folderRel) ?? []
     arr.push(meta)
     folderNotes.set(folderRel, arr)
 
+    if (collectionRoot && collectionRoot !== folderRel) {
+      const rootArr = folderNotes.get(collectionRoot) ?? []
+      rootArr.push(meta)
+      folderNotes.set(collectionRoot, rootArr)
+    }
+
     await fs.promises.mkdir(path.dirname(dest), { recursive: true })
 
-    const isCollectionFolder = collectionFolders.has(srcFolderRel)
+    const srcCollectionRoot = isInCollection(srcFolderRel, collectionFolders)
+    const isCollectionFolder = srcCollectionRoot !== null
 
     if (mode === "full" || !isCollectionFolder) {
       // Remove private notes blocks from the content
@@ -422,7 +456,9 @@ async function sync() {
     const folderDir = path.join(destRoot, folderRel)
     const indexPath = path.join(folderDir, "index.md")
     // Only generate index for folders that opt into collection behavior
-    const shouldGenerate = notes.some((n) => collectionFolders.has(n.srcFolderRel))
+    const shouldGenerate = notes.some(
+      (n) => isInCollection(n.srcFolderRel, collectionFolders) !== null,
+    )
     if (!shouldGenerate) continue
 
     // Title: use last path segment or root name
@@ -442,9 +478,14 @@ async function sync() {
       if (n.mode === "external" && n.externalUrl) {
         lines.push(`- [${n.title}](${n.externalUrl})`)
       } else if (n.mode === "full") {
-        // relative link to note without .md extension
-        const rel = path.relative(folderDir, n.destPath).replace(/\\/g, "/").replace(/\.md$/i, "")
-        lines.push(`- [${n.title}](${rel})`)
+        // Use absolute path from site root (/media/boardgames/note instead of ../../note)
+        const absPath =
+          "/" +
+          n.destPath
+            .replace(destRoot + "/", "")
+            .replace(/\\/g, "/")
+            .replace(/\.md$/i, "")
+        lines.push(`- [${n.title}](${absPath})`)
       } else {
         // title-only: show plain text entry
         lines.push(`- ${n.title}`)
@@ -471,23 +512,28 @@ async function sync() {
     if (hasTagFile) continue
 
     const title = tagName
-    
+
     const lines: string[] = []
     lines.push(`List of ${tagName.toLowerCase()} I have consumed from newest to oldest:`)
     lines.push("")
     // Sort notes newest-to-oldest by 'updated' frontmatter
     const sortedNotes = notes.slice().sort((a, b) => (b.updatedTS || 0) - (a.updatedTS || 0))
     // Exclude any folder index.md entries
-    const listNotes = sortedNotes.filter((n) => path.basename(n.destPath).toLowerCase() !== "index.md")
+    const listNotes = sortedNotes.filter(
+      (n) => path.basename(n.destPath).toLowerCase() !== "index.md",
+    )
     for (const n of listNotes) {
       if (n.mode === "external" && n.externalUrl) {
         lines.push(`- [${n.title}](${n.externalUrl})`)
       } else if (n.mode === "full") {
-        const rel = path
-          .relative(tagDir, n.destPath)
-          .replace(/\\/g, "/")
-          .replace(/\.md$/i, "")
-        lines.push(`- [${n.title}](${rel})`)
+        // Use absolute path from site root
+        const absPath =
+          "/" +
+          n.destPath
+            .replace(destRoot + "/", "")
+            .replace(/\\/g, "/")
+            .replace(/\.md$/i, "")
+        lines.push(`- [${n.title}](${absPath})`)
       } else {
         lines.push(`- ${n.title}`)
       }
@@ -504,7 +550,9 @@ async function sync() {
   }
 
   // Summary logs
-  console.log(`📁 Folder indexes created: ${folderIndexCount} (total items: ${folderIndexItemsTotal})`)
+  console.log(
+    `📁 Folder indexes created: ${folderIndexCount} (total items: ${folderIndexItemsTotal})`,
+  )
   console.log(`🏷️ Tag pages created: ${tagIndexCount} (total items: ${tagIndexItemsTotal})`)
 }
 
