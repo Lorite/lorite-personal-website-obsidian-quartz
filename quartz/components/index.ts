@@ -24,6 +24,8 @@ import Comments from "./Comments"
 import Flex from "./Flex"
 import ConditionalRender from "./ConditionalRender"
 import TagExplorer from "./TagExplorer"
+import Hi from "./Hi"
+import TopMenu from "./TopMenu"
 
 export {
   ArticleTitle,
@@ -52,4 +54,6 @@ export {
   Flex,
   ConditionalRender,
   TagExplorer,
+  Hi,
+  TopMenu,
 }
