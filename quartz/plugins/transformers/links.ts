@@ -17,6 +17,10 @@ import { Root } from "hast"
 interface Options {
   /** How to resolve Markdown paths */
   markdownLinkResolution: TransformOptions["strategy"]
+  /** Check for broken wikilinks */
+  checkBrokenWikilinks: boolean
+  /** What to do with broken wikilinks */
+  onBrokenWikilink: "disable" | "remove" | "error"
   /** Strips folders from a link so that it looks nice */
   prettyLinks: boolean
   openLinksInNewTab: boolean
@@ -26,6 +30,8 @@ interface Options {
 
 const defaultOptions: Options = {
   markdownLinkResolution: "absolute",
+  checkBrokenWikilinks: true,
+  onBrokenWikilink: "disable",
   prettyLinks: true,
   openLinksInNewTab: false,
   lazyLoad: false,
@@ -103,6 +109,7 @@ export const CrawlLinks: QuartzTransformerPlugin<Partial<Options>> = (userOpts) 
                   isAbsoluteUrl(dest, { httpOnly: false }) || dest.startsWith("#")
                 )
                 if (isInternal) {
+                  const preResolve = dest
                   dest = node.properties.href = transformLink(
                     file.data.slug!,
                     dest,
@@ -121,7 +128,32 @@ export const CrawlLinks: QuartzTransformerPlugin<Partial<Options>> = (userOpts) 
                   // need to decodeURIComponent here as WHATWG URL percent-encodes everything
                   const full = decodeURIComponent(stripSlashes(destCanonical, true)) as FullSlug
                   const simple = simplifySlug(full)
-                  outgoing.add(simple)
+
+                  const allSimpleSlugs = ctx.allSlugs.map((slug) => simplifySlug(slug))
+                  if (
+                    opts.checkBrokenWikilinks &&
+                    !allSimpleSlugs.includes(simple) &&
+                    !preResolve.startsWith(".") &&
+                    !preResolve.startsWith("/")
+                  ) {
+                    const action = opts.onBrokenWikilink
+                    if (action === "error") {
+                      throw new Error(
+                        `Broken wikilink found in ${file.data.slug}: ${preResolve} resolves to ${simple}`,
+                      )
+                    } else if (action === "remove") {
+                      // Remove the link but keep the text
+                      if (_parent && _index !== undefined) {
+                        _parent.children.splice(_index, 1, ...node.children)
+                      }
+                    } else {
+                      // Add "broken" class
+                      classes.push("broken")
+                      node.properties.className = classes
+                    }
+                  } else {
+                    outgoing.add(simple)
+                  }
                   node.properties["data-slug"] = full
                 }
 
