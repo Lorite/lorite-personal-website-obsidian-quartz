@@ -15,6 +15,11 @@ This plugin accepts the following configuration options:
   - `absolute`: Path relative to the root of the content folder.
   - `relative`: Path relative to the file you are linking from.
   - `shortest`: Name of the file. If this isn't enough to identify the file, use the full absolute path.
+- `checkBrokenWikilinks`: Whether to check for broken wikilinks. Defaults to `true`.
+- `onBrokenWikilink`: What to do with broken wikilinks. Can be `"disable"` (default), `"remove"`, or `"error"`.
+  - `disable`: Keep the link as is, but add the `broken` class.
+  - `remove`: Remove the link, leaving only the text.
+  - `error`: Throw an error and stop the build.
 - `prettyLinks`: If `true` (default), simplifies links by removing folder paths, making them more user friendly (e.g. `folder/deeply/nested/note` becomes `note`).
 - `openLinksInNewTab`: If `true`, configures external links to open in a new tab. Defaults to `false`.
 - `lazyLoad`: If `true`, adds lazy loading to resource elements (`img`, `video`, etc.) to improve page load performance. Defaults to `false`.
