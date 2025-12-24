@@ -15,7 +15,7 @@ function TopMenu({ displayClass, fileData }: QuartzComponentProps) {
           personal
         </a>
       ) : (
-        "#personal"
+        <a href="/tags/personal">#personal</a>
       )}
       <span aria-hidden="true" style="margin: 0 0.5rem;">
         |
@@ -25,7 +25,7 @@ function TopMenu({ displayClass, fileData }: QuartzComponentProps) {
           work
         </a>
       ) : (
-        "#work"
+        <a href="/tags/work">#work</a>
       )}
     </nav>
   )
