@@ -12,6 +12,7 @@ interface ParsedOptions {
   filterFn: (node: FileTrieNode) => boolean
   mapFn: (node: FileTrieNode) => void
   order: "sort" | "filter" | "map"[]
+  limit?: number
 }
 
 type FolderState = {
@@ -165,6 +166,7 @@ async function setupExplorer(currentSlug: FullSlug) {
       sortFn: new Function("return " + (dataFns.sortFn || "undefined"))(),
       filterFn: new Function("return " + (dataFns.filterFn || "undefined"))(),
       mapFn: new Function("return " + (dataFns.mapFn || "undefined"))(),
+      limit: dataFns.limit,
     }
 
     // Get folder state from local storage
@@ -191,6 +193,25 @@ async function setupExplorer(currentSlug: FullSlug) {
           if (opts.sortFn) trie.sort(opts.sortFn)
           break
       }
+    }
+
+    // Apply limit if specified
+    if (opts.limit && opts.limit > 0) {
+      // Collect all file nodes
+      const allFiles: FileTrieNode[] = []
+      const collectFiles = (node: FileTrieNode) => {
+        if (!node.isFolder) {
+          allFiles.push(node)
+        }
+        node.children.forEach(collectFiles)
+      }
+      collectFiles(trie)
+
+      // Keep only top N files (already sorted)
+      const topFiles = allFiles.slice(0, opts.limit)
+
+      // Replace trie children with flat list of top files
+      trie.children = topFiles
     }
 
     // Get folder paths for state management

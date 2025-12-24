@@ -272,3 +272,8 @@ li:has(> .folder-outer:not(.open)) > .folder-container > svg {
     overscroll-behavior: none;
   }
 }
+
+/* Recent Notes Explorer - prevent shrinking */
+.explorer[data-variant="recent-notes"] {
+  flex-shrink: 0;
+}

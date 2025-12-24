@@ -1,6 +1,30 @@
 import { PageLayout, SharedLayout } from "./quartz/cfg"
 import * as Component from "./quartz/components"
 
+const recentNotesExplorer = Component.Explorer({
+  title: "Recent Notes",
+  variant: "recent-notes",
+  folderDefaultState: "open",
+  limit: 10,
+  filterFn: (node) => {
+    if (node.isFolder) {
+      return node.slugSegment !== "tags"
+    }
+    return node.data?.date !== undefined
+  },
+  sortFn: (a, b) => {
+    if (a.isFolder && !b.isFolder) return -1
+    if (!a.isFolder && b.isFolder) return 1
+    if (!a.isFolder && !b.isFolder) {
+      const aDate = a.data?.date ? new Date(a.data.date).getTime() : 0
+      const bDate = b.data?.date ? new Date(b.data.date).getTime() : 0
+      return bDate - aDate
+    }
+    return a.displayName.localeCompare(b.displayName)
+  },
+  order: ["filter", "sort"],
+})
+
 // components shared across all pages
 export const sharedPageComponents: SharedLayout = {
   head: Component.Head(),
@@ -82,6 +106,7 @@ export const defaultContentPageLayout: PageLayout = {
         { Component: Component.ReaderMode() },
       ],
     }),
+    recentNotesExplorer,
     Component.Explorer({
       title: "Folder Explorer",
       folderDefaultState: "collapsed",
@@ -136,6 +161,7 @@ export const defaultListPageLayout: PageLayout = {
         { Component: Component.Darkmode() },
       ],
     }),
+    recentNotesExplorer,
     Component.Explorer({
       title: "Folder Explorer",
       folderDefaultState: "collapsed",

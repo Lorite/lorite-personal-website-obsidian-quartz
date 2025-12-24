@@ -20,6 +20,8 @@ export interface Options {
   filterFn: (node: FileTrieNode) => boolean
   mapFn: (node: FileTrieNode) => void
   order: OrderEntries[]
+  limit?: number
+  variant?: string
 }
 
 const defaultOptions: Options = {
@@ -69,11 +71,13 @@ export default ((userOpts?: Partial<Options>) => {
         data-behavior={opts.folderClickBehavior}
         data-collapsed={opts.folderDefaultState}
         data-savestate={opts.useSavedState}
+        data-variant={opts.variant}
         data-data-fns={JSON.stringify({
           order: opts.order,
           sortFn: opts.sortFn.toString(),
           filterFn: opts.filterFn.toString(),
           mapFn: opts.mapFn.toString(),
+          limit: opts.limit,
         })}
       >
         <button
