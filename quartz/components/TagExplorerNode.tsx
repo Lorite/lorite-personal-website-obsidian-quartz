@@ -6,7 +6,6 @@ import {
   simplifySlug,
   slugifyFilePath,
   SimpleSlug,
-  FullSlug,
   FilePath,
 } from "../util/path"
 import { clone } from "../util/clone"
