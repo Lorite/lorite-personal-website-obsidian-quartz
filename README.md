@@ -51,27 +51,33 @@
 
 ## Collections and Publishing Modes
 
-The sync script supports **collection folders** that auto-generate indexes for media consumption tracking (movies, books, games, etc.).
+The sync script supports **collection folders** that auto-generate index pages for media tracking (movies, books, games, tools, etc.).
 
 ### Collection Setup
 
-Add `collectionIndexOnly: true` to a folder's `index.md` frontmatter to enable collection behavior:
+Mark a folder as a collection by adding `collectionIndexOnly: true` to the frontmatter of any note inside that folder — you can name it anything (e.g., “List of movies I have watched”). It does not need to be `index.md`.
+
+Example source note (lives in your Obsidian vault):
 
 ```yaml
 ---
-title: Movies
+title: List of movies I have watched
 publish: true
 collectionIndexOnly: true
 ---
 ```
 
-- **Nested folders inherit collection behavior** — items in `media/videogames/pokemon/` roll up into `media/videogames/`'s index.
-- **Auto-generated indexes** — both folder (`media/movies/index.md`) and tag pages (`tags/movies.md`) are created with sorted lists.
-- **Wikilink format** — full notes use `[[Title]]`, folder indexes use `[[path/to/folder/]]`.
+What happens during sync:
+
+- **Generated index filename**: The output file in `content/` is created in the same folder and is named after the note’s `title` (sanitized), e.g. `content/media/movies/List of movies I have watched.md`.
+- **Source note is not copied**: The `collectionIndexOnly` source file is skipped from copying and replaced by the generated index.
+- **Tags**: The generated index includes `tags` from the folder path (e.g., `media`, `movies`) plus an internal tag `collection-index` used for filtering.
+- **Recent Notes panel**: Generated collection indexes are hidden from the left “Recent Notes” panel.
+- **Nested roll-up**: Notes in subfolders (e.g., `media/videogames/pokemon/`) will roll up into the closest collection folder’s index.
 
 ### Publishing Modes
 
-Control how individual notes appear in indexes using `publish_mode`:
+Control how individual notes appear in collection indexes using `publish_mode`:
 
 ```yaml
 ---
@@ -82,17 +88,57 @@ updated: 2024-12-20
 ---
 ```
 
-- **`full` (default)** — Note is published and linked with wikilink `[[Title]]` in indexes.
-- **`title`** — Note is **not published**; appears as plain text in indexes (for items without detailed notes).
-- **`external`** — Note is **not published**; appears as external link using `url` property (for items tracked elsewhere):
+- **`full` (default)** — The note is copied to `content/` and listed as `[[Title]]` in indexes.
+- **`title`** — The note is not copied; shown as plain text in the index (use for lightweight entries).
+- **`external`** — The note is not copied; shown as an external link using the `url` property:
   ```yaml
   publish_mode: external
   url: https://example.com/item
   ```
 
+Notes outside a collection folder always copy when `publish: true`. Inside a collection folder, only `publish_mode: full` notes are copied; `title` and `external` remain index-only entries.
+
 ### Sorting
 
-All collection indexes sort items **newest to oldest** based on the `updated` frontmatter property.
+All collection indexes sort entries **newest → oldest** using the `updated` frontmatter. If omitted or invalid, items fall back to the bottom.
+
+## Recent Notes Panel
+
+The left “Recent Notes” panel shows the most recently updated notes. It is configured in `quartz.layout.ts` using a specialized Explorer variant and a filter that excludes generated collection index pages.
+
+- **Excludes generated indexes**: Files tagged with `collection-index` are hidden from Recent Notes.
+- **Only notes with dates**: The filter also requires a valid `date` (derived from your configured `defaultDateType`).
+- **Where to change it**: `quartz.layout.ts`, the `recentNotesExplorer` config.
+
+Example (excerpt):
+
+```ts
+const recentNotesExplorer = Component.Explorer({
+  title: "Recent Notes",
+  variant: "recent-notes",
+  folderDefaultState: "open",
+  limit: 10,
+  filterFn: (node) => {
+    if (node.isFolder) return node.slugSegment !== "tags"
+    const tags = Array.isArray(node.data?.tags) ? node.data.tags : []
+    if (tags.includes("collection-index")) return false
+    return node.data?.date !== undefined
+  },
+})
+```
+
+Customize `limit`, add more exclusions, or change sorting as needed.
+
+## Tags Explorer Panel
+
+The left “Tag Explorer” works similarly to the regular Explorer, but groups by tags instead of folders.
+
+- Lists every tag found in note frontmatter.
+- Under each tag, shows all files that contain that tag.
+- The same file can appear under multiple tags.
+- Tag groups can be expanded/collapsed like folders.
+
+Configuration: adjust the component in `quartz.layout.ts` via `Component.TagExplorer({ ... })`. You can customize sorting and filtering, but the default behavior is alphabetical ordering of tags and files.
 
 # Quartz v4
 
