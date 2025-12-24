@@ -10,6 +10,8 @@ const recentNotesExplorer = Component.Explorer({
     if (node.isFolder) {
       return node.slugSegment !== "tags"
     }
+    const tags = Array.isArray(node.data?.tags) ? node.data?.tags : []
+    if (tags.includes("collection-index")) return false
     return node.data?.date !== undefined
   },
   sortFn: (a, b) => {

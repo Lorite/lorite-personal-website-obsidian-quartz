@@ -238,18 +238,18 @@ async function loadQuartzIgnorePatterns(): Promise<string[]> {
   }
 }
 
-// Load folders that opt into collection index-only behavior via frontmatter in their source index.md
+// Load folders that opt into collection index-only behavior via frontmatter in their source files
 async function loadCollectionFolders(
   sourceRoot: string,
   ignoreGlobs: string[],
 ): Promise<Set<string>> {
   const collection = new Set<string>()
-  const indexFiles = await globby(["**/index.md"], {
+  const allMarkdownFiles = await globby(["**/*.md"], {
     cwd: sourceRoot,
     absolute: true,
     ignore: ignoreGlobs,
   })
-  for (const fp of indexFiles) {
+  for (const fp of allMarkdownFiles) {
     try {
       const raw = await fs.promises.readFile(fp, "utf8")
       const parsed = matter(raw)
@@ -263,7 +263,7 @@ async function loadCollectionFolders(
         collection.add(relFolder)
       }
     } catch (e) {
-      console.warn(`⚠️  Failed to read index.md for collection check: ${fp}`, (e as Error).message)
+      console.warn(`⚠️  Failed to read file for collection check: ${fp}`, (e as Error).message)
     }
   }
   return collection
@@ -314,7 +314,7 @@ async function generateCollectionIndex(
 
   // Build markdown list
   const lines: string[] = []
-  lines.push(`List of ${title.toLowerCase()} I have consumed from newest to oldest:`)
+  lines.push(`${title} from newest to oldest:`)
   lines.push("")
   for (const n of listNotes) {
     if (n.mode === "external" && n.externalUrl) {
@@ -334,7 +334,10 @@ async function generateCollectionIndex(
   }
 
   const content = lines.join("\n")
-  const fm = { title, publish: true, ...frontmatterExtra }
+  const extra = frontmatterExtra ?? {}
+  const extraTags = Array.isArray(extra.tags) ? (extra.tags as string[]) : []
+  const tags = Array.from(new Set([...extraTags, "collection-index"]))
+  const fm = { title, publish: true, ...extra, tags }
   const fileOut = matter.stringify(content, fm)
   await fs.promises.mkdir(indexDir, { recursive: true })
   await fs.promises.writeFile(indexPath, fileOut, "utf8")
@@ -403,6 +406,7 @@ async function sync() {
 
   const folderNotes = new Map<string, NoteMeta[]>()
   const tagNotes = new Map<string, NoteMeta[]>()
+  const folderIndexTitles = new Map<string, string>()
 
   for (const file of markdownFiles) {
     const contents = await fs.promises.readFile(file, "utf8")
@@ -431,6 +435,15 @@ async function sync() {
     const folderRel = path.dirname(path.relative(destRoot, dest)).replace(/\\/g, "/")
     const srcFolderRel = path.dirname(path.relative(sourceRoot, file)).replace(/\\/g, "/")
     const collectionRoot = isInCollection(srcFolderRel, collectionFolders)
+
+    // Track title from files with collectionIndexOnly frontmatter
+    const isCollectionIndexFile =
+      parsed.data.collectionIndexOnly === true ||
+      parsed.data.collectionIndexOnly === "true" ||
+      parsed.data.collection === "index-only"
+    if (isCollectionIndexFile && collectionRoot) {
+      folderIndexTitles.set(srcFolderRel, title)
+    }
     const meta: NoteMeta = {
       title,
       destPath: dest,
@@ -459,11 +472,14 @@ async function sync() {
     const isCollectionFolder = srcCollectionRoot !== null
 
     if (mode === "full" || !isCollectionFolder) {
-      // Remove private notes blocks from the content
-      const filteredContent = removePrivateNotes(parsed.content)
-      const filteredFileContent = matter.stringify(filteredContent, parsed.data)
-      await fs.promises.writeFile(dest, filteredFileContent, "utf8")
-      publishedCount += 1
+      // Skip writing files with collectionIndexOnly in collection folders - they will be regenerated
+      if (!(isCollectionFolder && isCollectionIndexFile)) {
+        // Remove private notes blocks from the content
+        const filteredContent = removePrivateNotes(parsed.content)
+        const filteredFileContent = matter.stringify(filteredContent, parsed.data)
+        await fs.promises.writeFile(dest, filteredFileContent, "utf8")
+        publishedCount += 1
+      }
     } else {
       // Do not create a note file for title/external modes
     }
@@ -515,35 +531,47 @@ async function sync() {
     if (!shouldGenerate) continue
 
     const folderDir = path.join(destRoot, folderRel)
-    const indexPath = path.join(folderDir, "index.md")
-    const segments = folderRel.split("/").filter(Boolean)
-    const title = segments.length > 0 ? segments[segments.length - 1] : "Index"
 
-    const itemCount = await generateCollectionIndex(indexPath, folderDir, title, notes, indexPath)
+    // Use title from original index.md if available, otherwise use folder name
+    const indexTitle = folderIndexTitles.get(folderRel)
+    const segments = folderRel.split("/").filter(Boolean)
+    const fallbackTitle = segments.length > 0 ? segments[segments.length - 1] : "Index"
+    const title = indexTitle || fallbackTitle
+
+    // Generate filename from title, sanitized
+    const indexFilename = indexTitle ? `${sanitizeFilename(indexTitle)}.md` : "index.md"
+    const indexPath = path.join(folderDir, indexFilename)
+
+    // Extract tags from folder path (all segments become tags)
+    const tags = segments.length > 0 ? segments : []
+
+    const itemCount = await generateCollectionIndex(indexPath, folderDir, title, notes, indexPath, {
+      tags,
+    })
     folderIndexCount += 1
     folderIndexItemsTotal += itemCount
-    console.log(`📁 Created folder index '${folderRel}' with ${itemCount} items`)
+    console.log(`📁 Created folder index '${folderRel}/${indexFilename}' with ${itemCount} items`)
   }
 
   // Generate tag pages for collection tags
-  for (const [tagName, notes] of tagNotes.entries()) {
-    const tagFilePath = path.join(destRoot, "tags", `${tagName}.md`)
-    const hasTagFile = await pathExists(tagFilePath)
-    if (hasTagFile) continue
+  // for (const [tagName, notes] of tagNotes.entries()) {
+  //   const tagFilePath = path.join(destRoot, "tags", `${tagName}.md`)
+  //   const hasTagFile = await pathExists(tagFilePath)
+  //   if (hasTagFile) continue
 
-    const tagDir = path.dirname(tagFilePath)
-    const itemCount = await generateCollectionIndex(
-      tagFilePath,
-      tagDir,
-      tagName,
-      notes,
-      undefined,
-      { tags: [tagName] },
-    )
-    tagIndexCount += 1
-    tagIndexItemsTotal += itemCount
-    console.log(`🏷️ Created tag page '${tagName}' with ${itemCount} items`)
-  }
+  //   const tagDir = path.dirname(tagFilePath)
+  //   const itemCount = await generateCollectionIndex(
+  //     tagFilePath,
+  //     tagDir,
+  //     tagName,
+  //     notes,
+  //     undefined,
+  //     { tags: [tagName] },
+  //   )
+  //   tagIndexCount += 1
+  //   tagIndexItemsTotal += itemCount
+  //   console.log(`🏷️ Created tag page '${tagName}' with ${itemCount} items`)
+  // }
 
   // Summary logs
   console.log(
