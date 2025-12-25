@@ -72,7 +72,10 @@ const config: QuartzConfig = {
       //   bibliographyFile: "./content/.website-files/lorite-zotero.bib", // TODO: change this to your bibliography file
       //   csl: "./content/.website-files/ieee.csl", // TODO: change this to your preferred CSL file
       // }),
-      Plugin.ObsidianFlavoredMarkdown({ enableInHtmlEmbed: false }),
+      Plugin.ObsidianFlavoredMarkdown({
+        enableInHtmlEmbed: true,
+        disableBrokenWikilinks: true,
+      }),
       Plugin.GitHubFlavoredMarkdown(),
       Plugin.TableOfContents(),
       Plugin.CrawlLinks({ markdownLinkResolution: "shortest" }),
