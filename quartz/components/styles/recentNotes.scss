@@ -11,13 +11,46 @@
 
     & > li {
       margin: 1rem 0;
-      .section > .desc > h3 > a {
-        background-color: transparent;
+      .section > .desc > h3 {
+        font-size: 0.95rem;
+        line-height: 1.2;
+        margin: 0 0 0.25rem 0;
+        & > a {
+          background-color: transparent;
+          font-size: inherit; // ensure link follows the smaller heading size
+        }
       }
 
-      .section > .meta {
+      // Meta row with date and tags inline
+      .section .meta-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
         margin: 0 0 0.5rem 0;
+      }
+
+      .section .meta {
+        margin: 0;
         opacity: 0.6;
+        font-size: 0.8rem;
+      }
+
+      // Smaller tag font within recent notes list
+      .section .tags {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.35rem;
+        & li {
+          margin: 0;
+          list-style: none;
+        }
+        & .tag-link {
+          font-size: 0.75rem;
+        }
       }
     }
   }

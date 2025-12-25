@@ -244,19 +244,38 @@ a {
       grid-area: grid-sidebar-right;
       margin-right: 0;
       flex-direction: column;
-      @media all and ($mobile) {
-        margin-left: inherit;
-        margin-right: inherit;
-      }
-      @media all and not ($desktop) {
+      /* Tablet layout: keep side-by-side */
+      @media all and ($tablet) {
         position: initial;
         height: unset;
         width: 100%;
         flex-direction: row;
         padding: 0;
         & > * {
-          flex: 1;
+          flex: 1 1 0;
           max-height: 24rem;
+          min-height: 0;
+          overflow: auto;
+        }
+        & > .toc {
+          display: none;
+        }
+      }
+      /* Mobile layout: stack vertically */
+      @media all and ($mobile) {
+        margin-left: inherit;
+        margin-right: inherit;
+        position: initial;
+        height: unset;
+        width: 100%;
+        flex-direction: column;
+        padding: 0;
+        gap: 0.75rem;
+        & > * {
+          flex: 1 1 auto;
+          max-height: none;
+          min-height: 0;
+          overflow: visible;
         }
         & > .toc {
           display: none;

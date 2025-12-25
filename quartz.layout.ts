@@ -27,6 +27,23 @@ const recentNotesExplorer = Component.Explorer({
   order: ["filter", "sort"],
 })
 
+const normalFolderExplorer = Component.Explorer({
+  title: "Folder Explorer",
+  folderDefaultState: "collapsed",
+  filterFn: (node) => {
+    return node.slugSegment !== "tags"
+  },
+  sortFn: (a, b) => {
+    // Sort: folders first, then by name
+    if (a.isFolder && !b.isFolder) return -1
+    if (!a.isFolder && b.isFolder) return 1
+
+    // If both are folders or both are files, sort alphabetically
+    return a.displayName.localeCompare(b.displayName)
+  },
+  order: ["filter", "sort"],
+})
+
 // components shared across all pages
 export const sharedPageComponents: SharedLayout = {
   head: Component.Head(),
@@ -108,14 +125,21 @@ export const defaultContentPageLayout: PageLayout = {
         { Component: Component.ReaderMode() },
       ],
     }),
-    recentNotesExplorer,
-    Component.Explorer({
-      title: "Folder Explorer",
-      folderDefaultState: "collapsed",
-    }),
-    Component.TagExplorer({
-      title: "Tag Explorer",
-    }),
+    // On desktop, show recent notes explorer, folder explorer and tag explorer
+    Component.DesktopOnly(recentNotesExplorer),
+    Component.DesktopOnly(
+      Component.Explorer({
+        title: "Folder Explorer",
+        folderDefaultState: "collapsed",
+      }),
+    ),
+    Component.DesktopOnly(
+      Component.TagExplorer({
+        title: "Tag Explorer",
+      }),
+    ),
+    // On mobile, only show the folder explorer
+    Component.MobileOnly(normalFolderExplorer),
   ],
   right: [
     Component.Graph({
@@ -129,6 +153,20 @@ export const defaultContentPageLayout: PageLayout = {
     }),
     Component.DesktopOnly(Component.TableOfContents()),
     Component.Backlinks(),
+    Component.MobileOnly(
+      Component.RecentNotes({
+        title: "Recent Notes",
+        limit: 10,
+        filter: (node) => {
+          if (node.isFolder) {
+            return node.slugSegment !== "tags"
+          }
+          const tags = Array.isArray(node.frontmatter?.tags) ? node.frontmatter?.tags : []
+          if (tags.includes("collection-index")) return false
+          return node.dates?.modified !== undefined
+        },
+      }),
+    ),
   ],
 }
 
@@ -163,14 +201,21 @@ export const defaultListPageLayout: PageLayout = {
         { Component: Component.Darkmode() },
       ],
     }),
-    recentNotesExplorer,
-    Component.Explorer({
-      title: "Folder Explorer",
-      folderDefaultState: "collapsed",
-    }),
-    Component.TagExplorer({
-      title: "Tag Explorer",
-    }),
+    // On desktop, show recent notes explorer, folder explorer and tag explorer
+    Component.DesktopOnly(recentNotesExplorer),
+    Component.DesktopOnly(
+      Component.Explorer({
+        title: "Folder Explorer",
+        folderDefaultState: "collapsed",
+      }),
+    ),
+    Component.DesktopOnly(
+      Component.TagExplorer({
+        title: "Tag Explorer",
+      }),
+    ),
+    // On mobile, only show the folder explorer
+    Component.MobileOnly(normalFolderExplorer),
   ],
   right: [],
 }
