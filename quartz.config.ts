@@ -74,11 +74,13 @@ const config: QuartzConfig = {
       // }),
       Plugin.ObsidianFlavoredMarkdown({
         enableInHtmlEmbed: true,
-        disableBrokenWikilinks: true,
       }),
       Plugin.GitHubFlavoredMarkdown(),
       Plugin.TableOfContents(),
-      Plugin.CrawlLinks({ markdownLinkResolution: "shortest" }),
+      Plugin.CrawlLinks({
+        markdownLinkResolution: "shortest",
+        onBrokenWikilink: "remove",
+      }),
       Plugin.Description(),
       Plugin.Latex({ renderEngine: "katex" }),
     ],
