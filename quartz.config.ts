@@ -31,26 +31,41 @@ const config: QuartzConfig = {
       },
       colors: {
         lightMode: {
-          light: "#faf8f8",
-          lightgray: "#e5e5e5",
-          gray: "#b8b8b8",
-          darkgray: "#4e4e4e",
-          dark: "#2b2b2b",
-          secondary: "#284b63",
-          tertiary: "#84a59d",
-          highlight: "rgba(143, 159, 169, 0.15)",
-          textHighlight: "#fff23688",
+          // Beach Day: Pastel sky & sand
+          light: "#FFFBF0",
+          lightgray: "#E8F4F8",
+          gray: "#C8D8E4",
+          darkgray: "#5A7A8C",
+          dark: "#2C3E50",
+          // Links: Ocean teal
+          secondary: "#0084A7",
+          // Hover: Boston Dynamics yellow
+          tertiary: "#FBD403",
+          // Code highlight: Soft sand tint
+          highlight: "rgba(251, 212, 3, 0.08)",
+          // Selection: Warm pastel yellow
+          textHighlight: "#FBD40344",
         },
         darkMode: {
-          light: "#161618",
-          lightgray: "#393639",
-          gray: "#646464",
-          darkgray: "#d4d4d4",
-          dark: "#ebebec",
-          secondary: "#7b97aa",
-          tertiary: "#84a59d",
-          highlight: "rgba(143, 159, 169, 0.15)",
-          textHighlight: "#b3aa0288",
+          // Sunset Beach: Deep ocean + warm glow
+          // Dark navy sky
+          light: "#1A2332",
+          // Deep ocean
+          lightgray: "#2A3A52",
+          // Muted ocean teal
+          gray: "#4A5F7A",
+          // Sand/foam (text)
+          darkgray: "#E8E0D0",
+          // Bright sand (headings)
+          dark: "#FBF6ED",
+          // Links: Bright cyan/aqua
+          secondary: "#50D4FF",
+          // Hover: Golden sunset
+          tertiary: "#FFB84D",
+          // Code highlight: Sunset glow
+          highlight: "rgba(255, 184, 77, 0.15)",
+          // Selection: Deep sunset purple
+          textHighlight: "#FF6B9D66",
         },
       },
     },
