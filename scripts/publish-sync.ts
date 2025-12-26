@@ -280,6 +280,19 @@ function isInCollection(folderPath: string, collectionFolders: Set<string>): str
   return null
 }
 
+function getRatingColor(rating: number | undefined): string {
+  if (rating === undefined || rating === 0) return ""
+  if (rating >= 9.5) return "#00aa00" // Dark green
+  if (rating >= 9) return "#22cc22" // Green
+  if (rating >= 8.5) return "#44dd44" // Light green
+  if (rating >= 8) return "#88dd44" // Yellow-green
+  if (rating >= 7.5) return "#bbdd44" // Lime
+  if (rating >= 7) return "#dddd00" // Yellow
+  if (rating >= 6) return "#dd9900" // Orange
+  if (rating >= 5) return "#dd6600" // Dark orange
+  return "#dd3300" // Red
+}
+
 // Generate collection index (folder or tag) with list of notes
 type NoteMeta = {
   title: string
@@ -290,6 +303,7 @@ type NoteMeta = {
   externalUrl?: string
   updatedTS: number
   collectionRoot?: string
+  personalRating?: number
 }
 
 async function generateCollectionIndex(
@@ -300,7 +314,7 @@ async function generateCollectionIndex(
   filterIndexPath?: string,
   frontmatterExtra?: Record<string, unknown>,
 ): Promise<number> {
-  // Sort notes newest-to-oldest by 'updated' frontmatter
+  // Sort by date (newest first)
   const sortedNotes = notes.slice().sort((a, b) => (b.updatedTS || 0) - (a.updatedTS || 0))
 
   // Filter out index.md if path specified, or by basename
@@ -317,19 +331,26 @@ async function generateCollectionIndex(
   lines.push(`${title} from newest to oldest:`)
   lines.push("")
   for (const n of listNotes) {
+    const ratingColor = getRatingColor(n.personalRating)
+    const ratingText =
+      n.personalRating !== undefined && n.personalRating !== 0 ? `${n.personalRating}/10` : ""
+    const ratingDisplayFormatted = ratingText
+      ? ` <span style="color:${ratingColor}">${ratingText}</span>`
+      : ""
+
     if (n.mode === "external" && n.externalUrl) {
-      lines.push(`- [${n.title}](${n.externalUrl})`)
+      lines.push(`- [${n.title}](${n.externalUrl})${ratingDisplayFormatted}`)
     } else if (n.mode === "full") {
       // For index.md files, use folder path; otherwise use title
       if (path.basename(n.destPath).toLowerCase() === "index.md") {
         const folderPath = n.folderRel.replace(/\\/g, "/")
-        lines.push(`- [[${folderPath}/]]`)
+        lines.push(`- [[${folderPath}/]]${ratingDisplayFormatted}`)
       } else {
-        lines.push(`- [[${n.title}]]`)
+        lines.push(`- [[${n.title}]]${ratingDisplayFormatted}`)
       }
     } else {
       // title-only: show plain text entry
-      lines.push(`- ${n.title}`)
+      lines.push(`- ${n.title}${ratingDisplayFormatted}`)
     }
   }
 
@@ -419,6 +440,17 @@ async function sync() {
 
     const dest = resolveNoteDestination(file, parsed.data.path)
     const title = (parsed.data.title as string) ?? path.parse(file).name
+
+    // Extract personal_rating if present
+    let personalRating: number | undefined
+    const ratingRaw = parsed.data.personal_rating
+    if (typeof ratingRaw === "number") {
+      personalRating = ratingRaw
+    } else if (typeof ratingRaw === "string") {
+      const parsed_rating = parseFloat(ratingRaw)
+      if (!Number.isNaN(parsed_rating)) personalRating = parsed_rating
+    }
+
     const updatedRaw = (parsed.data.updated as unknown) ?? null
     let updatedTS = 0
     if (typeof updatedRaw === "string") {
@@ -453,6 +485,7 @@ async function sync() {
       externalUrl,
       updatedTS,
       collectionRoot: collectionRoot || undefined,
+      personalRating,
     }
 
     // Add to both the actual folder and the collection root (if different)
