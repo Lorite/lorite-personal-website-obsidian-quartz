@@ -109,6 +109,27 @@ function removePrivateNotes(content: string): string {
   )
 }
 
+function replaceWikilinksWithExternal(
+  content: string,
+  externalMap: Map<string, string>,
+): string {
+  // Replace wikilinks [[Title]] or [[Title|Alias]] with external markdown links
+  return content.replace(/\[\[([^\]]+)\]\]/g, (match, inner) => {
+    const parts = inner.split("|")
+    const title = parts[0].trim()
+    const alias = parts.length > 1 ? parts[1].trim() : title
+    
+    // Check if this title has an external URL
+    const externalUrl = externalMap.get(title)
+    if (externalUrl) {
+      return `[${alias}](${externalUrl})`
+    }
+    
+    // Keep the wikilink as-is if no external URL found
+    return match
+  })
+}
+
 function extractAssetRefsFromContent(contents: string): string[] {
   const refs = new Set<string>()
 
@@ -428,6 +449,12 @@ async function sync() {
   const folderNotes = new Map<string, NoteMeta[]>()
   const tagNotes = new Map<string, NoteMeta[]>()
   const folderIndexTitles = new Map<string, string>()
+  
+  // Map of note titles to external URLs for notes with publish_mode: external
+  const externalUrlMap = new Map<string, string>()
+  
+  // Track all published notes to process wikilink replacements later
+  const publishedNotePaths: string[] = []
 
   for (const file of markdownFiles) {
     const contents = await fs.promises.readFile(file, "utf8")
@@ -440,6 +467,14 @@ async function sync() {
 
     const dest = resolveNoteDestination(file, parsed.data.path)
     const title = (parsed.data.title as string) ?? path.parse(file).name
+    const filename = path.parse(file).name // filename without extension
+
+    // If publish_mode is external and has a URL, add to external map
+    // Map both the title and filename so wikilinks work with either
+    if (mode === "external" && externalUrl) {
+      externalUrlMap.set(title, externalUrl)
+      externalUrlMap.set(filename, externalUrl)
+    }
 
     // Skip external mode files if folder has no collectionIndexOnly file
     const srcFolderRelCheck = path.dirname(path.relative(sourceRoot, file)).replace(/\\/g, "/")
@@ -519,6 +554,7 @@ async function sync() {
         const filteredFileContent = matter.stringify(filteredContent, parsed.data)
         await fs.promises.writeFile(dest, filteredFileContent, "utf8")
         publishedCount += 1
+        publishedNotePaths.push(dest) // Track this file for wikilink replacement
       }
     } else {
       // Do not create a note file for title/external modes
@@ -562,6 +598,26 @@ async function sync() {
   console.log(
     `📄 Copied ${publishedCount} publish:true notes and ${assetCount} referenced assets into ${destRoot}`,
   )
+
+  // Replace wikilinks with external URLs in all published notes
+  if (externalUrlMap.size > 0) {
+    let replacedCount = 0
+    for (const notePath of publishedNotePaths) {
+      const content = await fs.promises.readFile(notePath, "utf8")
+      const parsed = matter(content)
+      const updatedContent = replaceWikilinksWithExternal(parsed.content, externalUrlMap)
+      
+      // Only rewrite if content changed
+      if (updatedContent !== parsed.content) {
+        const updatedFileContent = matter.stringify(updatedContent, parsed.data)
+        await fs.promises.writeFile(notePath, updatedFileContent, "utf8")
+        replacedCount += 1
+      }
+    }
+    console.log(
+      `🔗 Replaced wikilinks with external URLs in ${replacedCount} files (${externalUrlMap.size} external notes)`,
+    )
+  }
 
   // Generate folder indexes for collection folders
   for (const [folderRel, notes] of folderNotes.entries()) {
