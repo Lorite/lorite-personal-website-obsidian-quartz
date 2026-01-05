@@ -28,6 +28,8 @@ export default ((opts?: Partial<ContentMetaOptions>) => {
 
     if (text) {
       const segments: (string | JSX.Element)[] = []
+      const externalUrl =
+        typeof fileData.frontmatter?.url === "string" ? fileData.frontmatter.url : undefined
 
       if (fileData.dates) {
         segments.push(<Date date={getDate(cfg, fileData)!} locale={cfg.locale} />)
@@ -40,6 +42,14 @@ export default ((opts?: Partial<ContentMetaOptions>) => {
           minutes: Math.ceil(minutes),
         })
         segments.push(<span>{displayedTime}</span>)
+
+        if (externalUrl) {
+          segments.push(
+            <a href={externalUrl} target="_blank" rel="noopener noreferrer">
+              External URL
+            </a>,
+          )
+        }
       }
 
       return (
