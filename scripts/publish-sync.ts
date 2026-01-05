@@ -109,6 +109,24 @@ function removePrivateNotes(content: string): string {
   )
 }
 
+function removeLocalLinks(content: string): string {
+  const localSchemes = ["zotero://", "obsidian://", "file://"]
+  const hasLocalScheme = (href: string) =>
+    localSchemes.some((scheme) => href.toLowerCase().startsWith(scheme))
+
+  // Strip markdown links pointing to local schemes, keep the link text to preserve readability
+  const stripMdLinks = content.replace(/!?\[([^\]]*)\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g, (m, text, href) => {
+    if (hasLocalScheme(href)) return text || ""
+    return m
+  })
+
+  // Remove autolinks like <zotero://...>
+  return stripMdLinks.replace(/<([^>]+)>/g, (m, href) => {
+    if (hasLocalScheme(href)) return ""
+    return m
+  })
+}
+
 function replaceWikilinksWithExternal(
   content: string,
   externalMap: Map<string, string>,
@@ -550,7 +568,7 @@ async function sync() {
       // Skip writing files with collectionIndexOnly in collection folders - they will be regenerated
       if (!(isCollectionFolder && isCollectionIndexFile)) {
         // Remove private notes blocks from the content
-        const filteredContent = removePrivateNotes(parsed.content)
+        const filteredContent = removeLocalLinks(removePrivateNotes(parsed.content))
         const filteredFileContent = matter.stringify(filteredContent, parsed.data)
         await fs.promises.writeFile(dest, filteredFileContent, "utf8")
         publishedCount += 1
