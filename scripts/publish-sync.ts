@@ -478,21 +478,22 @@ async function sync() {
     const contents = await fs.promises.readFile(file, "utf8")
     const parsed = matter(contents)
 
-    if (!shouldPublish(parsed.data.publish)) continue
-
-    const mode: "full" | "title" | "external" = (parsed.data.publish_mode as any) ?? "full"
+    const modeRaw = parsed.data.publish_mode as any
+    const mode: "full" | "title" | "external" = (modeRaw as any) ?? "full"
     const externalUrl = typeof parsed.data.url === "string" ? parsed.data.url : undefined
-
-    const dest = resolveNoteDestination(file, parsed.data.path)
     const title = (parsed.data.title as string) ?? path.parse(file).name
     const filename = path.parse(file).name // filename without extension
 
     // If publish_mode is external and has a URL, add to external map
     // Map both the title and filename so wikilinks work with either
-    if (mode === "external" && externalUrl) {
+    if (externalUrl && (mode === "external" || modeRaw === undefined || modeRaw === null)) {
       externalUrlMap.set(title, externalUrl)
       externalUrlMap.set(filename, externalUrl)
     }
+
+    if (!shouldPublish(parsed.data.publish)) continue
+
+    const dest = resolveNoteDestination(file, parsed.data.path)
 
     // Skip external mode files if folder has no collectionIndexOnly file
     const srcFolderRelCheck = path.dirname(path.relative(sourceRoot, file)).replace(/\\/g, "/")
