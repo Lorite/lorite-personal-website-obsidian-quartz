@@ -207,6 +207,11 @@ async function setupExplorer(currentSlug: FullSlug) {
       }
       collectFiles(trie)
 
+      // Sort files if sortFn is provided (for correct ordering when limit is applied)
+      if (opts.sortFn) {
+        allFiles.sort(opts.sortFn)
+      }
+
       // Keep only top N files (already sorted)
       const topFiles = allFiles.slice(0, opts.limit)
 

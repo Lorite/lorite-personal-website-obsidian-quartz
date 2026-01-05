@@ -7,19 +7,22 @@ const recentNotesExplorer = Component.Explorer({
   folderDefaultState: "open",
   limit: 10,
   filterFn: (node) => {
+    // Keep folders (except tags), but filter files to only show those with dates
     if (node.isFolder) {
       return node.slugSegment !== "tags"
     }
     const tags = Array.isArray(node.data?.tags) ? node.data?.tags : []
     if (tags.includes("collection-index")) return false
-    return node.data?.date !== undefined
+    return node.data?.dates?.modified !== undefined
   },
   sortFn: (a, b) => {
     if (a.isFolder && !b.isFolder) return -1
     if (!a.isFolder && b.isFolder) return 1
     if (!a.isFolder && !b.isFolder) {
-      const aDate = a.data?.date ? new Date(a.data.date).getTime() : 0
-      const bDate = b.data?.date ? new Date(b.data.date).getTime() : 0
+      const aModified = a.data?.dates?.modified
+      const bModified = b.data?.dates?.modified
+      const aDate = aModified ? new Date(aModified).getTime() : 0
+      const bDate = bModified ? new Date(bModified).getTime() : 0
       return bDate - aDate
     }
     return a.displayName.localeCompare(b.displayName)
