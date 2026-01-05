@@ -115,10 +115,13 @@ function removeLocalLinks(content: string): string {
     localSchemes.some((scheme) => href.toLowerCase().startsWith(scheme))
 
   // Strip markdown links pointing to local schemes, keep the link text to preserve readability
-  const stripMdLinks = content.replace(/!?\[([^\]]*)\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g, (m, text, href) => {
-    if (hasLocalScheme(href)) return text || ""
-    return m
-  })
+  const stripMdLinks = content.replace(
+    /!?\[([^\]]*)\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g,
+    (m, text, href) => {
+      if (hasLocalScheme(href)) return text || ""
+      return m
+    },
+  )
 
   // Remove autolinks like <zotero://...>
   return stripMdLinks.replace(/<([^>]+)>/g, (m, href) => {
@@ -127,22 +130,19 @@ function removeLocalLinks(content: string): string {
   })
 }
 
-function replaceWikilinksWithExternal(
-  content: string,
-  externalMap: Map<string, string>,
-): string {
+function replaceWikilinksWithExternal(content: string, externalMap: Map<string, string>): string {
   // Replace wikilinks [[Title]] or [[Title|Alias]] with external markdown links
   return content.replace(/\[\[([^\]]+)\]\]/g, (match, inner) => {
     const parts = inner.split("|")
     const title = parts[0].trim()
     const alias = parts.length > 1 ? parts[1].trim() : title
-    
+
     // Check if this title has an external URL
     const externalUrl = externalMap.get(title)
     if (externalUrl) {
       return `[${alias}](${externalUrl})`
     }
-    
+
     // Keep the wikilink as-is if no external URL found
     return match
   })
@@ -467,10 +467,10 @@ async function sync() {
   const folderNotes = new Map<string, NoteMeta[]>()
   const tagNotes = new Map<string, NoteMeta[]>()
   const folderIndexTitles = new Map<string, string>()
-  
+
   // Map of note titles to external URLs for notes with publish_mode: external
   const externalUrlMap = new Map<string, string>()
-  
+
   // Track all published notes to process wikilink replacements later
   const publishedNotePaths: string[] = []
 
@@ -625,7 +625,7 @@ async function sync() {
       const content = await fs.promises.readFile(notePath, "utf8")
       const parsed = matter(content)
       const updatedContent = replaceWikilinksWithExternal(parsed.content, externalUrlMap)
-      
+
       // Only rewrite if content changed
       if (updatedContent !== parsed.content) {
         const updatedFileContent = matter.stringify(updatedContent, parsed.data)

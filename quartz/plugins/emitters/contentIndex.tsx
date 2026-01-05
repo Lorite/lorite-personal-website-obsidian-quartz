@@ -48,7 +48,7 @@ function generateSiteMap(cfg: GlobalConfiguration, idx: ContentIndexMap): string
   const base = cfg.baseUrl ?? ""
   const createURLEntry = (slug: SimpleSlug, content: ContentDetails): string => `<url>
     <loc>https://${joinSegments(base, encodeURI(slug))}</loc>
-    ${content.date && `<lastmod>${typeof content.date === 'string' ? content.date : content.date.toISOString()}</lastmod>`}
+    ${content.date && `<lastmod>${typeof content.date === "string" ? content.date : content.date.toISOString()}</lastmod>`}
   </url>`
   const urls = Array.from(idx)
     .map(([slug, content]) => createURLEntry(simplifySlug(slug), content))
@@ -64,14 +64,14 @@ function generateRSSFeed(cfg: GlobalConfiguration, idx: ContentIndexMap, limit?:
     <link>https://${joinSegments(base, encodeURI(slug))}</link>
     <guid>https://${joinSegments(base, encodeURI(slug))}</guid>
     <description><![CDATA[ ${content.richContent ?? content.description} ]]></description>
-    <pubDate>${content.date ? (typeof content.date === 'string' ? new Date(content.date).toUTCString() : content.date.toUTCString()) : ''}</pubDate>
+    <pubDate>${content.date ? (typeof content.date === "string" ? new Date(content.date).toUTCString() : content.date.toUTCString()) : ""}</pubDate>
   </item>`
 
   const items = Array.from(idx)
     .sort(([_, f1], [__, f2]) => {
-      const f1Date = f1.date ? (typeof f1.date === 'string' ? new Date(f1.date) : f1.date) : null
-      const f2Date = f2.date ? (typeof f2.date === 'string' ? new Date(f2.date) : f2.date) : null
-      
+      const f1Date = f1.date ? (typeof f1.date === "string" ? new Date(f1.date) : f1.date) : null
+      const f2Date = f2.date ? (typeof f2.date === "string" ? new Date(f2.date) : f2.date) : null
+
       if (f1Date && f2Date) {
         return f2Date.getTime() - f1Date.getTime()
       } else if (f1Date && !f2Date) {
@@ -157,9 +157,15 @@ export const ContentIndex: QuartzEmitterPlugin<Partial<Options>> = (opts) => {
           // The dates will be parsed back in the browser
           if (content.dates) {
             content.dates = {
-              created: (content.dates.created instanceof Date ? content.dates.created.toISOString() : content.dates.created) as any,
-              modified: (content.dates.modified instanceof Date ? content.dates.modified.toISOString() : content.dates.modified) as any,
-              published: (content.dates.published instanceof Date ? content.dates.published.toISOString() : content.dates.published) as any,
+              created: (content.dates.created instanceof Date
+                ? content.dates.created.toISOString()
+                : content.dates.created) as any,
+              modified: (content.dates.modified instanceof Date
+                ? content.dates.modified.toISOString()
+                : content.dates.modified) as any,
+              published: (content.dates.published instanceof Date
+                ? content.dates.published.toISOString()
+                : content.dates.published) as any,
             }
           }
           if (content.date && content.date instanceof Date) {
