@@ -441,6 +441,13 @@ async function sync() {
     const dest = resolveNoteDestination(file, parsed.data.path)
     const title = (parsed.data.title as string) ?? path.parse(file).name
 
+    // Skip external mode files if folder has no collectionIndexOnly file
+    const srcFolderRelCheck = path.dirname(path.relative(sourceRoot, file)).replace(/\\/g, "/")
+    const collectionRootCheck = isInCollection(srcFolderRelCheck, collectionFolders)
+    if (mode === "external" && !collectionRootCheck) {
+      continue
+    }
+
     // Extract personal_rating if present
     let personalRating: number | undefined
     const ratingRaw = parsed.data.personal_rating
