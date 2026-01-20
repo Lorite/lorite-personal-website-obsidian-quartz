@@ -357,7 +357,6 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
     autoStart: false,
     autoDensity: true,
     backgroundAlpha: 0,
-    preference: "webgpu",
     resolution: window.devicePixelRatio,
     eventMode: "static",
   })
