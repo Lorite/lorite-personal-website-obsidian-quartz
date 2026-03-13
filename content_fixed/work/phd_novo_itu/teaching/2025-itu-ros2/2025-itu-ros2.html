@@ -1,0 +1,1749 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<script src="2025-itu-ros2_files/libs/clipboard/clipboard.min.js"></script>
+<script src="2025-itu-ros2_files/libs/quarto-html/tabby.min.js"></script>
+<script src="2025-itu-ros2_files/libs/quarto-html/popper.min.js"></script>
+<script src="2025-itu-ros2_files/libs/quarto-html/tippy.umd.min.js"></script>
+<link href="2025-itu-ros2_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="2025-itu-ros2_files/libs/quarto-html/light-border.css" rel="stylesheet">
+<link href="2025-itu-ros2_files/libs/quarto-html/quarto-syntax-highlighting-8f1af79587c2686b78fe4e1fbadd71ab.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="2025-itu-ros2_files/libs/quarto-contrib/quarto-timer-1.0.0/timer.js"></script>
+<link href="2025-itu-ros2_files/libs/quarto-contrib/quarto-timer-1.0.0/timer.css" rel="stylesheet">
+<link href="2025-itu-ros2_files/libs/quarto-contrib/reveal-auto-agenda-0.0.3/reveal-auto-agenda.css" rel="stylesheet">
+<link href="2025-itu-ros2_files/libs/quarto-contrib/fontawesome6-6.7.2/all.min.css" rel="stylesheet">
+<link href="2025-itu-ros2_files/libs/quarto-contrib/fontawesome6-6.7.2/latex-fontsize.css" rel="stylesheet"><meta charset="utf-8">
+  <meta name="generator" content="quarto-1.8.14">
+
+  <meta name="author" content="Alejandro Lorite Mora">
+  <meta name="dcterms.date" content="2025-12-09">
+  <title>Robot programming in ROS 2</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="2025-itu-ros2_files/libs/revealjs/dist/reset.css">
+  <link rel="stylesheet" href="2025-itu-ros2_files/libs/revealjs/dist/reveal.css">
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+      vertical-align: middle;
+    }
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      { color: #003b4f; background-color: #f1f3f5; }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span { color: #003b4f; } /* Normal */
+    code span.al { color: #ad0000; } /* Alert */
+    code span.an { color: #5e5e5e; } /* Annotation */
+    code span.at { color: #657422; } /* Attribute */
+    code span.bn { color: #ad0000; } /* BaseN */
+    code span.bu { } /* BuiltIn */
+    code span.cf { color: #003b4f; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #20794d; } /* Char */
+    code span.cn { color: #8f5902; } /* Constant */
+    code span.co { color: #5e5e5e; } /* Comment */
+    code span.cv { color: #5e5e5e; font-style: italic; } /* CommentVar */
+    code span.do { color: #5e5e5e; font-style: italic; } /* Documentation */
+    code span.dt { color: #ad0000; } /* DataType */
+    code span.dv { color: #ad0000; } /* DecVal */
+    code span.er { color: #ad0000; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #ad0000; } /* Float */
+    code span.fu { color: #4758ab; } /* Function */
+    code span.im { color: #00769e; } /* Import */
+    code span.in { color: #5e5e5e; } /* Information */
+    code span.kw { color: #003b4f; font-weight: bold; } /* Keyword */
+    code span.op { color: #5e5e5e; } /* Operator */
+    code span.ot { color: #003b4f; } /* Other */
+    code span.pp { color: #ad0000; } /* Preprocessor */
+    code span.sc { color: #5e5e5e; } /* SpecialChar */
+    code span.ss { color: #20794d; } /* SpecialString */
+    code span.st { color: #20794d; } /* String */
+    code span.va { color: #111111; } /* Variable */
+    code span.vs { color: #20794d; } /* VerbatimString */
+    code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="2025-itu-ros2_files/libs/revealjs/dist/theme/quarto-4a8db398e83ad995f6317a3dc0723195.css">
+  <link rel="stylesheet" href="./assets/style.css">
+  <link href="2025-itu-ros2_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
+  <link href="2025-itu-ros2_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
+  <link href="2025-itu-ros2_files/libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
+  <link href="2025-itu-ros2_files/libs/revealjs/plugin/reveal-chalkboard/font-awesome/css/all.css" rel="stylesheet">
+  <link href="2025-itu-ros2_files/libs/revealjs/plugin/reveal-chalkboard/style.css" rel="stylesheet">
+  <link href="2025-itu-ros2_files/libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
+  <style type="text/css">
+    .reveal div.sourceCode {
+      margin: 0;
+      overflow: auto;
+    }
+    .reveal div.hanging-indent {
+      margin-left: 1em;
+      text-indent: -1em;
+    }
+    .reveal .slide:not(.center) {
+      height: 100%;
+    }
+    .reveal .slide.scrollable {
+      overflow-y: auto;
+    }
+    .reveal .footnotes {
+      height: 100%;
+      overflow-y: auto;
+    }
+    .reveal .slide .absolute {
+      position: absolute;
+      display: block;
+    }
+    .reveal .footnotes ol {
+      counter-reset: ol;
+      list-style-type: none; 
+      margin-left: 0;
+    }
+    .reveal .footnotes ol li:before {
+      counter-increment: ol;
+      content: counter(ol) ". "; 
+    }
+    .reveal .footnotes ol li > p:first-child {
+      display: inline-block;
+    }
+    .reveal .slide ul,
+    .reveal .slide ol {
+      margin-bottom: 0.5em;
+    }
+    .reveal .slide ul li,
+    .reveal .slide ol li {
+      margin-top: 0.4em;
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide ul[role="tablist"] li {
+      margin-bottom: 0;
+    }
+    .reveal .slide ul li > *:first-child,
+    .reveal .slide ol li > *:first-child {
+      margin-block-start: 0;
+    }
+    .reveal .slide ul li > *:last-child,
+    .reveal .slide ol li > *:last-child {
+      margin-block-end: 0;
+    }
+    .reveal .slide .columns:nth-child(3) {
+      margin-block-start: 0.8em;
+    }
+    .reveal blockquote {
+      box-shadow: none;
+    }
+    .reveal .tippy-content>* {
+      margin-top: 0.2em;
+      margin-bottom: 0.7em;
+    }
+    .reveal .tippy-content>*:last-child {
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide > img.stretch.quarto-figure-center,
+    .reveal .slide > img.r-stretch.quarto-figure-center {
+      display: block;
+      margin-left: auto;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-left,
+    .reveal .slide > img.r-stretch.quarto-figure-left  {
+      display: block;
+      margin-left: 0;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-right,
+    .reveal .slide > img.r-stretch.quarto-figure-right  {
+      display: block;
+      margin-left: auto;
+      margin-right: 0; 
+    }
+  </style>
+  <script src="assets/custom.js" type="application/javascript"></script>
+</head>
+<body class="quarto-light">
+  <div class="reveal">
+    <div class="slides">
+
+<section id="title-slide" class="quarto-title-block center">
+  <h1 class="title">Robot programming in ROS 2</h1>
+  <p class="subtitle">Advanced Topics in Robotics</p>
+
+<div class="quarto-title-authors">
+<div class="quarto-title-author">
+<div class="quarto-title-author-name">
+Alejandro Lorite Mora <a href="https://orcid.org/0000-0002-8704-1248" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a>
+</div>
+<div class="quarto-title-author-email">
+<a href="mailto:lori@itu.com">lori@itu.com</a>
+</div>
+        <p class="quarto-title-affiliation">
+            REAL Lab (ITU), Helix Lab, Novo Nordisk
+          </p>
+    </div>
+</div>
+
+  <p class="date">December 9, 2025</p>
+</section>
+<section>
+<section id="introduction" class="title-slide slide level1 agenda-slide center">
+<h1>Introduction</h1>
+<div class="agenda-heading">
+<p>Agenda</p>
+</div>
+<div class="agenda">
+<ol>
+<li><div class="agenda-active agenda-clickable">
+<a href="#/introduction">Introduction</a>
+</div></li>
+<li><div class="agenda-inactive agenda-post-active agenda-clickable">
+<a href="#/first-steps-with-ros">First Steps With ROS</a>
+</div></li>
+<li><div class="agenda-inactive agenda-post-active agenda-clickable">
+<a href="#/live-demo-simple-pubsub-node">Live Demo: Simple Pub/Sub Node</a>
+</div></li>
+<li><div class="agenda-inactive agenda-post-active agenda-clickable">
+<a href="#/fastapi-vs-ros-2">FastAPI vs ROS 2</a>
+</div></li>
+<li><div class="agenda-inactive agenda-post-active agenda-clickable">
+<a href="#/hands-on-project">Hands-on Project</a>
+</div></li>
+<li><div class="agenda-inactive agenda-post-active agenda-clickable">
+<a href="#/wrap-up-feedback">Wrap-up &amp; Feedback</a>
+</div></li>
+</ol>
+</div>
+<aside class="notes">
+<p>This is the title slide. Welcome everyone, set the stage for the 4-hour session.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="todays-4-hour-plan" class="title-slide slide level2 center">
+<h2>Today’s 4-Hour Plan</h2>
+<ul>
+<li><strong>Introduction (30 min):</strong> My background, your background, set-up for the session.</li>
+<li><strong>First steps with ROS 2 (25 min):</strong> Explain core ROS 2 concepts: nodes, topics, messages, services, … + basic CLI tools.</li>
+<li><em>Break (10 min)</em></li>
+<li><strong>Live Demo (30 min):</strong> Write a simple Pub/Sub node.</li>
+<li><strong>FastAPI vs ROS 2 (30 min):</strong> Experiment with the ROS 2 example node.</li>
+<li><em>Break (10 min)</em></li>
+<li><strong>Hands-on Project (90 min):</strong> Build integration &amp; debug.</li>
+<li><strong>Wrap-up &amp; Feedback (10 min)</strong></li>
+</ul>
+<aside class="notes">
+<p>Time boxes keep momentum; consider showing a visible timer overlay.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+
+<section id="about-me" class="title-slide slide level2 center">
+<h2>About Me</h2>
+<div class="columns">
+<div class="column" style="width:60%;">
+<p><strong>Alejandro Lorite Mora</strong></p>
+<ul>
+<li>PhD Researcher in Robotics</li>
+<li>Affiliations: REAL Lab (ITU) · Helix Lab · Novo Nordisk<br>
+</li>
+<li>Focus: Multi-robot collaboration (ground + aerial) for industrial inspection &amp; maintenance<br>
+</li>
+<li>Email: lori@itu.com</li>
+</ul>
+</div><div class="column" style="width:40%;">
+<p><img data-src="media/imgs/Alejandro-ROSCON-Spain-2025.jpg" style="width:100.0%"></p>
+</div></div>
+<aside class="notes">
+<p>Keep this personal and brief. Goal: Build rapport; invite students to ask questions anytime.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+
+<section id="phd-project-overview" class="title-slide slide level2 center">
+<h2>PhD Project Overview</h2>
+<p><strong>Core Goal:</strong> Automate inspection &amp; maintenance in complex industrial facilities still done manually.<br>
+<strong>Robot Team:</strong> Heterogeneous collaboration between a quadruped (with manipulator arm) and an aerial drone <span class="fragment"><strong>using ROS 2.</strong></span></p>
+<div class="fragment">
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><img data-src="media/imgs/Spot_Arm_no_bg.png" style="width:100.0%"></p>
+</div><div class="column" style="width:50%;">
+<p><img data-src="media/imgs/Crazyflie%202.1_handforscale-1600px_1024x1024.png" style="width:100.0%"></p>
+</div></div>
+<aside class="notes">
+<p>Emphasize iteration: simulation → real world. Invite questions about what “cooperative localization” or “heterogeneous” means.</p>
+<p>Research Focus Areas - Cooperative localization (shared situational awareness)<br>
+- Complex manipulation &amp; assembly tasks (arm + drone support)<br>
+- Drone-assisted inspection &amp; assembly (overhead perspectives, payload handoff)<br>
+- Safe autonomous operation (risk reduction in hazardous zones)</p>
+<p>Methodology Pipeline 1. High-fidelity simulation in ROS 2 + Gazebo (rapid iteration)<br>
+2. Transfer &amp; validation on physical robots (lab → realistic factory-like settings)<br>
+3. Measure robustness, safety improvements, and task efficiency.</p>
+<p>Why It Matters - Improves worker safety (less exposure to hazardous areas)<br>
+- Reduces downtime and inspection labor cost<br>
+- Scales to complex facilities with many assets<br>
+- Builds foundations for future fully autonomous maintenance teams</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</div>
+</section>
+
+<section id="about-you" class="title-slide slide level2 center">
+<h2>About You</h2>
+<div style="position: relative; padding-bottom: 56.25%; padding-top: 35px; height: 0; overflow: hidden;">
+<iframe sandbox="allow-scripts allow-same-origin allow-presentation" allowfullscreen="true" allowtransparency="true" frameborder="0" height="315" src="https://www.mentimeter.com/app/presentation/aldybarc2q6jh9nf6mwtuvxf73mnsfeq/embed" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" width="420">
+</iframe>
+</div>
+<aside class="notes">
+<p>Capture aggregate results verbally; if Ubuntu comfort ≤2 average, show hidden Terminal Basics slide next. Reassure: “Low scores are fine—this session is built for that.”.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+
+
+
+<section id="intended-learning-outcomes" class="title-slide slide level2 center">
+<h2>Intended Learning Outcomes</h2>
+<p>By the end of the session you will be able to:</p>
+<ul>
+<li><strong>ILO 1:</strong> Identify and briefly explain core ROS 2 concepts: nodes, topics, messages, services.</li>
+<li><strong>ILO 2:</strong> Use essential ROS 2 CLI commands: list, info, run, pub, echo.</li>
+<li><strong>ILO 3:</strong> Implement and run a minimal Python publisher/subscriber node.</li>
+<li><strong>ILO 4:</strong> Replace a FastAPI-based interaction with an equivalent ROS 2 node: communication via topics, actions, and services.</li>
+</ul>
+</section>
+
+<section id="what-we-will-not-cover" class="title-slide slide level2 center">
+<h2>What We Will NOT Cover</h2>
+<ul>
+<li>Launch files</li>
+<li>Building C++ nodes</li>
+<li>Advanced ROS 2 concepts (parameters, lifecycle, composition, etc.)</li>
+<li>Simulation with Gazebo or other tools</li>
+<li>Integration with mobile robots or manipulators</li>
+<li>Integration with perception libraries (e.g., OpenCV, PCL)</li>
+<li>Multi-robot systems</li>
+<li>…</li>
+</ul>
+</section>
+</section>
+<section>
+<section id="first-steps-with-ros" class="title-slide slide level1 agenda-slide center">
+<h1>First Steps With ROS</h1>
+<div class="agenda-heading">
+<p>Agenda</p>
+</div>
+<div class="agenda">
+<ol>
+<li><div class="agenda-inactive agenda-pre-active agenda-clickable">
+<a href="#/introduction">Introduction</a>
+</div></li>
+<li><div class="agenda-active agenda-clickable">
+<a href="#/first-steps-with-ros">First Steps With ROS</a>
+</div></li>
+<li><div class="agenda-inactive agenda-post-active agenda-clickable">
+<a href="#/live-demo-simple-pubsub-node">Live Demo: Simple Pub/Sub Node</a>
+</div></li>
+<li><div class="agenda-inactive agenda-post-active agenda-clickable">
+<a href="#/fastapi-vs-ros-2">FastAPI vs ROS 2</a>
+</div></li>
+<li><div class="agenda-inactive agenda-post-active agenda-clickable">
+<a href="#/hands-on-project">Hands-on Project</a>
+</div></li>
+<li><div class="agenda-inactive agenda-post-active agenda-clickable">
+<a href="#/wrap-up-feedback">Wrap-up &amp; Feedback</a>
+</div></li>
+</ol>
+</div>
+</section>
+<section id="a-bit-of-history" class="title-slide slide level2 center">
+<h2>A Bit of History</h2>
+<iframe width="1280" height="560" src="https://www.youtube-nocookie.com/embed/5hjlyA2eE9A?si=jmD2N03zxk60Uhfq,vq=hd720p" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen="">
+</iframe>
+</section>
+<section class="slide level3">
+
+<ul>
+<li>Founded in 2007 by Willow Garage at the Stanford Artificial Intelligence Lab.</li>
+<li>Since 2013 managed by OSRF (Open Source Robotics Foundation).</li>
+<li>ROS 2 started in 2014 to address limitations of ROS 1.</li>
+<li>Current ROS 2 release: Jazzy Jalisco (May 2024), supported until May 2029.</li>
+<li>We will use: <strong>Humble Hawksbill (May 2022)</strong>, supported until May 2027.</li>
+<li>ROS 2 built on DDS (Data Distribution Service) for real-time, reliable communication.</li>
+<li>Find out more in the <a href="https://www.youtube.com/watch?v=4s3c36zSdrE&amp;list=PLmt_WogQ_rcJW0dvLzrW13lpyiTaZnFes">Red Hat - How to Start a Robot Revolution series</a>.</li>
+</ul>
+</section>
+
+<section id="what-is-ros-ros-2" class="title-slide slide level2 center">
+<h2>What is ROS / ROS 2?</h2>
+<ul>
+<li><strong>ROS</strong> stands for Robot Operating System.</li>
+<li>It is not a computer operating system, but a <strong>middleware</strong> or a Meta Operating System that increases the system’s capabilities for robotic applications.</li>
+<li>ROS 2 is the second generation of this middleware.</li>
+<li>ROS is fundamentally an <strong>open-source</strong> software released under licenses like <strong>Apache 2</strong> and <strong>BSD</strong>.</li>
+<li>ROS provides standardized communication protocols, libraries, and tools to facilitate robot software development.</li>
+<li>The fundamental difference distinguishing ROS from other middlewares is its vast <strong>developers community</strong> around the world.</li>
+</ul>
+</section>
+
+<section id="why-ros" class="title-slide slide level2 center">
+<h2>Why ROS?</h2>
+<ul>
+<li><strong>Open Source:</strong> Active community, still evolving and improving.</li>
+<li><strong>Development Tools:</strong> Debugging tools, 2D &amp; 3D visualization tools, logging tools, simulation tools.</li>
+<li><strong>Modularity:</strong> Build complex systems from smaller, reusable components.</li>
+<li><strong>Hardware Abstraction:</strong> Works with various hardware platforms and sensors.</li>
+<li><strong>Scalability:</strong> From small robots to large multi-robot systems.</li>
+</ul>
+<aside class="notes">
+<ul>
+<li>Open Source
+<ul>
+<li>Free to use and modify</li>
+<li>Large community contributing code and support</li>
+</ul></li>
+<li>Development Tools
+<ul>
+<li>Tools for debugging, visualization, and simulation</li>
+<li>Makes development faster and easier</li>
+<li>Try ideas safely and quickly before using real robots</li>
+<li>Repeat scenarios to learn and improve</li>
+</ul></li>
+<li>Modularity
+<ul>
+<li>Build with small, focused parts that fit together</li>
+<li>Easier to change one part without breaking the rest</li>
+</ul></li>
+<li>Hardware Abstraction
+<ul>
+<li>Works with many different robots and sensors</li>
+<li>Easier to switch hardware without changing software</li>
+</ul></li>
+<li>Scalability
+<ul>
+<li>From small robots to big multi-robot systems</li>
+<li>Grows with your project needs</li>
+</ul></li>
+</ul>
+<p>Also discuss:</p>
+<ul>
+<li>CI/CD (Continuous Integration/Delivery)
+<ul>
+<li>Regular, small updates with automatic checks</li>
+<li>Catch issues early and keep quality high</li>
+</ul></li>
+<li>Containerization
+<ul>
+<li>Package everything so it runs the same everywhere</li>
+<li>Fewer “works on my machine” problems</li>
+</ul></li>
+</ul>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+
+<section id="three-dimensions-of-ros-2" class="title-slide slide level2 center">
+<h2>Three Dimensions of ROS 2</h2>
+<p>ROS 2 is approached from three different but complementary dimensions:</p>
+<ol type="1">
+<li><strong>The Community:</strong> A fundamental element where developers contribute applications and utilities through public repositories.</li>
+<li><strong>The Computation Graph:</strong> A representation of the running ROS 2 application, composed of nodes and arcs.</li>
+<li><strong>The Workspace:</strong> The static set of software installed on the computer/robot, including development tools and the build system (Colcon).</li>
+</ol>
+</section>
+<section id="the-computation-graph" class="slide level3">
+<h3>The Computation Graph</h3>
+
+<img data-src="media/imgs/ros2_computation_graph.png" class="quarto-figure quarto-figure-center r-stretch" style="width:80.0%"></section>
+
+
+
+<section id="ubuntu-terminal-basics" class="title-slide slide level2 center">
+<h2>Ubuntu Terminal Basics</h2>
+<p>If many are new to Ubuntu:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href=""></a><span class="bu">pwd</span>        <span class="co"># where am I?</span></span>
+<span id="cb1-2"><a href=""></a><span class="fu">ls</span> <span class="at">-1</span>      <span class="co"># list files (one per line)</span></span>
+<span id="cb1-3"><a href=""></a><span class="bu">cd</span> <span class="op">&lt;</span>dir<span class="op">&gt;</span>   <span class="co"># change directory</span></span>
+<span id="cb1-4"><a href=""></a><span class="ex">*tab*</span>      <span class="co"># auto-complete names</span></span>
+<span id="cb1-5"><a href=""></a><span class="ex">*ctrl+c*</span>   <span class="co"># stop a running process</span></span>
+<span id="cb1-6"><a href=""></a><span class="bu">history</span>    <span class="co"># show previous commands</span></span>
+<span id="cb1-7"><a href=""></a><span class="ex">*ctrl+r*</span>   <span class="co"># reverse search command history</span></span>
+<span id="cb1-8"><a href=""></a><span class="fu">clear</span>      <span class="co"># clean the screen</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<aside class="notes">
+<p>Only show if poll indicates low CLI familiarity. Invite students to try each command once.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+
+<section id="ros-2-core-concepts" class="title-slide slide level2 center">
+<h2>ROS 2 Core Concepts</h2>
+
+</section>
+<section id="turtlesim-rqt" class="slide level3">
+<h3>Turtlesim &amp; rqt</h3>
+<ul>
+<li>Let’s follow along with a live demo of <code>turtlesim</code> and <code>rqt</code>.</li>
+<li>Feel free to find the tutorial online <a href="https://docs.ros.org/en/humble/Tutorials/Beginner-CLI-Tools/Introducing-Turtlesim/Introducing-Turtlesim.html">here</a>.</li>
+</ul>
+
+<img data-src="media/imgs/turtlesim.png" class="quarto-figure quarto-figure-center r-stretch" style="width:80.0%"><aside class="notes">
+<p>Make them help each other if they get stuck and promote collaboration. A simple simulator that comes pre-installed with ROS 2. It provides a graphical window where a turtle can be controlled to move around using ROS 2 commands. Great for learning and testing basic ROS 2 concepts without needing complex hardware. - <code>sudo apt update &amp;&amp; sudo apt install ros-humble-turtlesim</code> - <code>ros2 pkg executables turtlesim</code> - <code>ros2 run turtlesim turtlesim_node</code> The simulator window should appear, with a random turtle in the center. In the terminal, under the command, you will see messages from the node.</p>
+<p>Move the robot: - Open a new terminal and source ROS 2 again. <code>ros2 run turtlesim turtle_teleop_key</code> You can see the nodes, and their associated topics, services, and actions, using the list subcommands of the respective commands: <code>ros2 node list</code>, <code>ros2 topic list</code>, <code>ros2 service list</code>, <code>ros2 action list</code></p>
+<p>Use rqt: - <code>sudo apt install ros-humble-rqt ros-humble-rqt-common-plugins</code> - <code>ros2 run rqt_graph rqt_graph</code> When running rqt for the first time, the window will be blank. No worries; just select Plugins &gt; Services &gt; …</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="nodes-and-execution" class="slide level3">
+<h3>Nodes and Execution</h3>
+<ul>
+<li>Let’s see the nodes in action using the turtlesim example again. <img data-src="media/imgs/core-nodes-TopicandService.gif" class="quarto-figure quarto-figure-center" style="width:80.0%"></li>
+</ul>
+<aside class="notes">
+<p>Nodes communicate using different paradigms:</p>
+<ul>
+<li><strong>Publication/Subscription (Topics):</strong> Asynchronous communication where N nodes publish messages to a <strong>topic</strong> that reaches M subscribers. This is the most common type.</li>
+<li><strong>Services:</strong> Asynchronous 1:1 communication where a node requests another and expects an immediate response. In ROS 1, this was synchronous, but this is not recommended in ROS 2.</li>
+<li><strong>Actions:</strong> Asynchronous 1:1 communication for requests that take time to complete, allowing the calling node to receive <strong>periodic feedback</strong>.</li>
+</ul>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="publicationsubscription-topics" class="slide level3">
+<h3>Publication/Subscription (Topics)</h3>
+<ul>
+<li><strong>Publisher:</strong> The node that sends messages to a topic.</li>
+<li><strong>Subscriber:</strong> The node that receives messages from a topic.</li>
+<li><strong>Topics:</strong> The name of a data stream (e.g., <code>/camera_image</code>).</li>
+<li><strong>Messages:</strong> The actual data. A specific, defined format (e.g., <code>String</code>, <code>Image</code>).</li>
+</ul>
+
+<img data-src="media/imgs/core-topics-MultiplePublisherandMultipleSubscriber.gif" class="quarto-figure quarto-figure-center r-stretch" style="width:80.0%"><aside class="notes">
+<p>In rqt, topic Monitor from the menu bar at the top. Run <code>ros2 topic list -t</code> to see all topics with their types. Run the teleop node: <code>ros2 run turtlesim turtle_teleop_key</code> Try publishing with the teleop node, to the <code>/turtle1/cmd_vel</code> topic to move the turtle using rqt, or with the terminal: <code>ros2 topic pub /turtle1/cmd_vel geometry_msgs/msg/Twist "{linear: {x: 2.0, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 1.8}}"</code> Run <code>ros2 topic info /turtle1/cmd_vel --verbose</code> to see publishers and subscribers. Run <code>ros2 interface show geometry_msgs/msg/Twist</code> to see the message structure.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="services-requestresponse" class="slide level3">
+<h3>Services (Request/Response)</h3>
+<ul>
+<li><strong>Service Server:</strong> The node that offers a service.</li>
+<li><strong>Service Client:</strong> The node that calls the service.</li>
+<li><strong>Service:</strong> A named request/reply interaction (e.g., <code>/spawn_turtle</code>).</li>
+<li><strong>Request/Response:</strong> The data sent to and received from the service.</li>
+</ul>
+
+<img data-src="media/imgs/core-services-Service-MultipleServiceClient.gif" class="quarto-figure quarto-figure-center r-stretch" style="width:80.0%"><aside class="notes">
+<p>In rqt, service Caller from the menu bar at the top. Run <code>ros2 service list</code> to see all available services. Run <code>ros2 service info /turtle1/set_pen --verbose</code> to see the service type and nodes. Run <code>ros2 interface show turtlesim/srv/SetPen</code> to see the service structure. Try the set_pen service to change the turtle’s pen color using the service caller in rqt or with the terminal: <code>ros2 service call /turtle1/set_pen turtlesim/srv/SetPen "{r: 255, g: 0, b: 0, width: 5, off: 0}"</code> Spawn a new turtle: <code>ros2 service call /spawn turtlesim/srv/Spawn "{x: 2.0, y: 2.0, theta: 0.0, name: 'turtle2'}"</code></p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="actions-long-running" class="slide level3">
+<h3>Actions (Long-running)</h3>
+<p>What if completion takes time?</p>
+<ul>
+<li><strong>Action Server:</strong> The node that performs the action.</li>
+<li><strong>Action Client:</strong> The node that requests the action.</li>
+<li><strong>Action:</strong> A named long-running request/feedback/reply interaction (e.g., <code>/turtle1/rotate_absolute</code>).</li>
+<li><strong>Goal/Feedback/Result:</strong> The data sent to, received during, and returned from the action.</li>
+</ul>
+
+<img data-src="media/imgs/core-actions-Action-SingleActionClient.gif" class="quarto-figure quarto-figure-center r-stretch" style="width:80.0%"><aside class="notes">
+<p>In rqt, action Client from the menu bar at the top. Run <code>ros2 action list</code> to see all available actions. Run <code>ros2 action info /turtle1/rotate_absolute --verbose</code> to see the action type and nodes. Run <code>ros2 interface show turtlesim/action/RotateAbsolute</code> to see the action structure. Use the action client in rqt or with the terminal: <code>ros2 action send_goal /turtle1/rotate_absolute turtlesim/action/RotateAbsolute "{theta: 1.57, angular_speed: 1.0}"</code></p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+</section>
+<section>
+<section id="live-demo-simple-pubsub-node" class="title-slide slide level1 agenda-slide center">
+<h1>Live Demo: Simple Pub/Sub Node</h1>
+<div class="agenda-heading">
+<p>Agenda</p>
+</div>
+<div class="agenda">
+<ol>
+<li><div class="agenda-inactive agenda-pre-active agenda-clickable">
+<a href="#/introduction">Introduction</a>
+</div></li>
+<li><div class="agenda-inactive agenda-pre-active agenda-clickable">
+<a href="#/first-steps-with-ros">First Steps With ROS</a>
+</div></li>
+<li><div class="agenda-active agenda-clickable">
+<a href="#/live-demo-simple-pubsub-node">Live Demo: Simple Pub/Sub Node</a>
+</div></li>
+<li><div class="agenda-inactive agenda-post-active agenda-clickable">
+<a href="#/fastapi-vs-ros-2">FastAPI vs ROS 2</a>
+</div></li>
+<li><div class="agenda-inactive agenda-post-active agenda-clickable">
+<a href="#/hands-on-project">Hands-on Project</a>
+</div></li>
+<li><div class="agenda-inactive agenda-post-active agenda-clickable">
+<a href="#/wrap-up-feedback">Wrap-up &amp; Feedback</a>
+</div></li>
+</ol>
+</div>
+</section>
+<section id="section" class="title-slide slide level2 center">
+<h2></h2>
+<ul>
+<li>Let’s follow along with a live demo of a simple Pub/Sub node.</li>
+<li>Feel free to find the tutorial online <a href="https://docs.ros.org/en/humble/Tutorials/Beginner-Client-Libraries/Writing-A-Simple-Py-Publisher-And-Subscriber.html">here</a>.</li>
+</ul>
+</section>
+<section id="section-1" class="slide level3">
+<h3></h3>
+<h4 id="create-a-ros-2-package">Create a ROS 2 Package</h4>
+<div class="sourceCode" id="cb2"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href=""></a><span class="bu">source</span> /opt/ros/humble/setup.bash</span>
+<span id="cb2-2"><a href=""></a><span class="fu">mkdir</span> <span class="at">-p</span> ros2_ws/src</span>
+<span id="cb2-3"><a href=""></a><span class="bu">cd</span> ros2_ws/src</span>
+<span id="cb2-4"><a href=""></a><span class="ex">ros2</span> pkg create <span class="at">--build-type</span> ament_python <span class="at">--node-name</span> my_node itu_pubsub_example</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<aside class="notes">
+<p>— Create a ROS 2 Package — This command creates a new ROS 2 package named <code>itu_pubsub_example</code> with a Python node called <code>my_node</code>. The package will be set up with the necessary structure and files to get you started with ROS 2 development. Show the generated folder structure:</p>
+<pre><code>itu_pubsub_example/
+├── package.xml
+├── setup.cfg
+├── setup.py
+└── itu_pubsub_example
+    └── my_node.py
+...</code></pre>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+<h4 id="build-the-package">Build the Package</h4>
+<div class="sourceCode" id="cb4"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href=""></a><span class="bu">cd</span> ros2_ws</span>
+<span id="cb4-2"><a href=""></a><span class="ex">rosdep</span> install <span class="at">-i</span> <span class="at">--from-path</span> src <span class="at">--rosdistro</span> humble <span class="at">-y</span></span>
+<span id="cb4-3"><a href=""></a><span class="ex">colcon</span> build <span class="at">--symlink-install</span></span>
+<span id="cb4-4"><a href=""></a><span class="bu">source</span> install/setup.bash</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<aside class="notes">
+<p>— Build the Package — This sequence of commands builds your ROS 2 workspace. <code>rosdep</code> installs any dependencies your package may have. <code>colcon build</code> compiles the package, and <code>source install/setup.bash</code> sets up your environment to use the newly built package.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+<h4 id="run-the-node">Run the Node</h4>
+<div class="sourceCode" id="cb5"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href=""></a><span class="ex">ros2</span> run itu_pubsub_example my_node</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<aside class="notes">
+<p>— Run the Node — This command runs the <code>my_node</code> node from the <code>itu_pubsub_example</code> package.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section class="slide level3">
+
+<h4 id="publisher-talker">Publisher (Talker)</h4>
+<div class="sourceCode" id="cb6"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href=""></a><span class="va">self</span>.publisher_ <span class="op">=</span> <span class="va">self</span>.create_publisher(String, <span class="st">'my_topic'</span>, <span class="dv">10</span>)</span>
+<span id="cb6-2"><a href=""></a>msg <span class="op">=</span> String()</span>
+<span id="cb6-3"><a href=""></a>msg.data <span class="op">=</span> <span class="st">"Hello"</span></span>
+<span id="cb6-4"><a href=""></a><span class="va">self</span>.publisher_.publish(msg)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<aside class="notes">
+<p>— PUBLISHER CODE —</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href=""></a><span class="im">import</span> rclpy</span>
+<span id="cb7-2"><a href=""></a><span class="im">from</span> rclpy.node <span class="im">import</span> Node</span>
+<span id="cb7-3"><a href=""></a></span>
+<span id="cb7-4"><a href=""></a><span class="im">from</span> std_msgs.msg <span class="im">import</span> String</span>
+<span id="cb7-5"><a href=""></a></span>
+<span id="cb7-6"><a href=""></a></span>
+<span id="cb7-7"><a href=""></a><span class="kw">class</span> MinimalPublisher(Node):</span>
+<span id="cb7-8"><a href=""></a></span>
+<span id="cb7-9"><a href=""></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>):</span>
+<span id="cb7-10"><a href=""></a>        <span class="bu">super</span>().<span class="fu">__init__</span>(<span class="st">'minimal_publisher'</span>)</span>
+<span id="cb7-11"><a href=""></a>        <span class="va">self</span>.publisher_ <span class="op">=</span> <span class="va">self</span>.create_publisher(String, <span class="st">'topic'</span>, <span class="dv">10</span>)</span>
+<span id="cb7-12"><a href=""></a>        timer_period <span class="op">=</span> <span class="fl">0.5</span>  <span class="co"># seconds</span></span>
+<span id="cb7-13"><a href=""></a>        <span class="va">self</span>.timer <span class="op">=</span> <span class="va">self</span>.create_timer(timer_period, <span class="va">self</span>.timer_callback)</span>
+<span id="cb7-14"><a href=""></a>        <span class="va">self</span>.i <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb7-15"><a href=""></a></span>
+<span id="cb7-16"><a href=""></a>    <span class="kw">def</span> timer_callback(<span class="va">self</span>):</span>
+<span id="cb7-17"><a href=""></a>        msg <span class="op">=</span> String()</span>
+<span id="cb7-18"><a href=""></a>        msg.data <span class="op">=</span> <span class="st">'Hello World: </span><span class="sc">%d</span><span class="st">'</span> <span class="op">%</span> <span class="va">self</span>.i</span>
+<span id="cb7-19"><a href=""></a>        <span class="va">self</span>.publisher_.publish(msg)</span>
+<span id="cb7-20"><a href=""></a>        <span class="va">self</span>.get_logger().info(<span class="st">'Publishing: "</span><span class="sc">%s</span><span class="st">"'</span> <span class="op">%</span> msg.data)</span>
+<span id="cb7-21"><a href=""></a>        <span class="va">self</span>.i <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb7-22"><a href=""></a></span>
+<span id="cb7-23"><a href=""></a></span>
+<span id="cb7-24"><a href=""></a><span class="kw">def</span> main(args<span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb7-25"><a href=""></a>    rclpy.init(args<span class="op">=</span>args)</span>
+<span id="cb7-26"><a href=""></a></span>
+<span id="cb7-27"><a href=""></a>    minimal_publisher <span class="op">=</span> MinimalPublisher()</span>
+<span id="cb7-28"><a href=""></a></span>
+<span id="cb7-29"><a href=""></a>    rclpy.spin(minimal_publisher)</span>
+<span id="cb7-30"><a href=""></a></span>
+<span id="cb7-31"><a href=""></a>    <span class="co"># Destroy the node explicitly</span></span>
+<span id="cb7-32"><a href=""></a>    <span class="co"># (optional - otherwise it will be done automatically</span></span>
+<span id="cb7-33"><a href=""></a>    <span class="co"># when the garbage collector destroys the node object)</span></span>
+<span id="cb7-34"><a href=""></a>    minimal_publisher.destroy_node()</span>
+<span id="cb7-35"><a href=""></a>    rclpy.shutdown()</span>
+<span id="cb7-36"><a href=""></a></span>
+<span id="cb7-37"><a href=""></a></span>
+<span id="cb7-38"><a href=""></a><span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">'__main__'</span>:</span>
+<span id="cb7-39"><a href=""></a>    main()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Add dependencies to the <code>package.xml</code>:</p>
+<pre><code>&lt;exec_depend&gt;rclpy&lt;/exec_depend&gt;
+&lt;exec_depend&gt;std_msgs&lt;/exec_depend&gt;</code></pre>
+<p>Modify <code>setup.py</code>:</p>
+<pre><code>entry_points={
+        'console_scripts': [
+                'talker = py_pubsub.publisher_member_function:main',
+        ],
+},</code></pre>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+<h4 id="subscriber-listener">Subscriber (Listener)</h4>
+<div class="sourceCode" id="cb10"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href=""></a><span class="va">self</span>.subscription <span class="op">=</span> <span class="va">self</span>.create_subscription(</span>
+<span id="cb10-2"><a href=""></a>    String, <span class="st">'my_topic'</span>, <span class="va">self</span>.listener_callback, <span class="dv">10</span>)</span>
+<span id="cb10-3"><a href=""></a></span>
+<span id="cb10-4"><a href=""></a><span class="kw">def</span> listener_callback(<span class="va">self</span>, msg):</span>
+<span id="cb10-5"><a href=""></a>    <span class="va">self</span>.get_logger().info(<span class="ss">f'I heard: "</span><span class="sc">{</span>msg<span class="sc">.</span>data<span class="sc">}</span><span class="ss">"'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<aside class="notes">
+<p>— SUBSCRIBER CODE —</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href=""></a><span class="im">import</span> rclpy</span>
+<span id="cb11-2"><a href=""></a><span class="im">from</span> rclpy.node <span class="im">import</span> Node</span>
+<span id="cb11-3"><a href=""></a></span>
+<span id="cb11-4"><a href=""></a><span class="im">from</span> std_msgs.msg <span class="im">import</span> String</span>
+<span id="cb11-5"><a href=""></a></span>
+<span id="cb11-6"><a href=""></a></span>
+<span id="cb11-7"><a href=""></a><span class="kw">class</span> MinimalSubscriber(Node):</span>
+<span id="cb11-8"><a href=""></a></span>
+<span id="cb11-9"><a href=""></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>):</span>
+<span id="cb11-10"><a href=""></a>        <span class="bu">super</span>().<span class="fu">__init__</span>(<span class="st">'minimal_subscriber'</span>)</span>
+<span id="cb11-11"><a href=""></a>        <span class="va">self</span>.subscription <span class="op">=</span> <span class="va">self</span>.create_subscription(</span>
+<span id="cb11-12"><a href=""></a>            String,</span>
+<span id="cb11-13"><a href=""></a>            <span class="st">'topic'</span>,</span>
+<span id="cb11-14"><a href=""></a>            <span class="va">self</span>.listener_callback,</span>
+<span id="cb11-15"><a href=""></a>            <span class="dv">10</span>)</span>
+<span id="cb11-16"><a href=""></a>        <span class="va">self</span>.subscription  <span class="co"># prevent unused variable warning</span></span>
+<span id="cb11-17"><a href=""></a></span>
+<span id="cb11-18"><a href=""></a>    <span class="kw">def</span> listener_callback(<span class="va">self</span>, msg):</span>
+<span id="cb11-19"><a href=""></a>        <span class="va">self</span>.get_logger().info(<span class="st">'I heard: "</span><span class="sc">%s</span><span class="st">"'</span> <span class="op">%</span> msg.data)</span>
+<span id="cb11-20"><a href=""></a></span>
+<span id="cb11-21"><a href=""></a></span>
+<span id="cb11-22"><a href=""></a><span class="kw">def</span> main(args<span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb11-23"><a href=""></a>    rclpy.init(args<span class="op">=</span>args)</span>
+<span id="cb11-24"><a href=""></a></span>
+<span id="cb11-25"><a href=""></a>    minimal_subscriber <span class="op">=</span> MinimalSubscriber()</span>
+<span id="cb11-26"><a href=""></a></span>
+<span id="cb11-27"><a href=""></a>    rclpy.spin(minimal_subscriber)</span>
+<span id="cb11-28"><a href=""></a></span>
+<span id="cb11-29"><a href=""></a>    <span class="co"># Destroy the node explicitly</span></span>
+<span id="cb11-30"><a href=""></a>    <span class="co"># (optional - otherwise it will be done automatically</span></span>
+<span id="cb11-31"><a href=""></a>    <span class="co"># when the garbage collector destroys the node object)</span></span>
+<span id="cb11-32"><a href=""></a>    minimal_subscriber.destroy_node()</span>
+<span id="cb11-33"><a href=""></a>    rclpy.shutdown()</span>
+<span id="cb11-34"><a href=""></a></span>
+<span id="cb11-35"><a href=""></a></span>
+<span id="cb11-36"><a href=""></a><span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">'__main__'</span>:</span>
+<span id="cb11-37"><a href=""></a>    main()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Modify <code>setup.py</code>:</p>
+<pre><code>entry_points={
+        'console_scripts': [
+                'talker = py_pubsub.publisher_member_function:main',
+                'listener = py_pubsub.subscriber_member_function:main',
+        ],
+},</code></pre>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+<h4 id="run-the-nodes">Run the Nodes</h4>
+<div class="sourceCode" id="cb13"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a href=""></a><span class="co"># In terminal 1</span></span>
+<span id="cb13-2"><a href=""></a><span class="ex">ros2</span> run itu_pubsub_example pub_node</span>
+<span id="cb13-3"><a href=""></a><span class="co"># In terminal 2</span></span>
+<span id="cb13-4"><a href=""></a><span class="ex">ros2</span> run itu_pubsub_example sub_node</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<aside class="notes">
+<p>You should see messages being published and received in the respective terminals. Remember to source the workspace in each terminal before running the nodes:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb14-1"><a href=""></a><span class="bu">source</span> ~/ros2_ws/install/setup.bash</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section class="slide level3">
+
+<h4 id="service-server">Service Server</h4>
+<div class="sourceCode" id="cb15"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href=""></a><span class="va">self</span>.srv <span class="op">=</span> <span class="va">self</span>.create_service(SetPen, <span class="st">'set_pen'</span>, <span class="va">self</span>.set_pen_callback)</span>
+<span id="cb15-2"><a href=""></a></span>
+<span id="cb15-3"><a href=""></a><span class="kw">def</span> set_pen_callback(<span class="va">self</span>, request, response):</span>
+<span id="cb15-4"><a href=""></a>    <span class="va">self</span>.get_logger().info(<span class="ss">f'Setting pen: </span><span class="sc">{</span>request<span class="sc">.</span>r<span class="sc">}</span><span class="ss">, </span><span class="sc">{</span>request<span class="sc">.</span>g<span class="sc">}</span><span class="ss">, </span><span class="sc">{</span>request<span class="sc">.</span>b<span class="sc">}</span><span class="ss">, </span><span class="sc">{</span>request<span class="sc">.</span>width<span class="sc">}</span><span class="ss">, </span><span class="sc">{</span>request<span class="sc">.</span>off<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb15-5"><a href=""></a>    response.success <span class="op">=</span> <span class="va">True</span></span>
+<span id="cb15-6"><a href=""></a>    <span class="cf">return</span> response</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<aside class="notes">
+<p>Similar to the publisher/subscriber example, create two nodes: one for the service server and another for the service client.</p>
+<p>— SERVICE SERVER CODE —</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href=""></a><span class="im">from</span> example_interfaces.srv <span class="im">import</span> AddTwoInts</span>
+<span id="cb16-2"><a href=""></a></span>
+<span id="cb16-3"><a href=""></a><span class="im">import</span> rclpy</span>
+<span id="cb16-4"><a href=""></a><span class="im">from</span> rclpy.node <span class="im">import</span> Node</span>
+<span id="cb16-5"><a href=""></a></span>
+<span id="cb16-6"><a href=""></a></span>
+<span id="cb16-7"><a href=""></a><span class="kw">class</span> MinimalService(Node):</span>
+<span id="cb16-8"><a href=""></a></span>
+<span id="cb16-9"><a href=""></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>):</span>
+<span id="cb16-10"><a href=""></a>        <span class="bu">super</span>().<span class="fu">__init__</span>(<span class="st">'minimal_service'</span>)</span>
+<span id="cb16-11"><a href=""></a>        <span class="va">self</span>.srv <span class="op">=</span> <span class="va">self</span>.create_service(AddTwoInts, <span class="st">'add_two_ints'</span>, <span class="va">self</span>.add_two_ints_callback)</span>
+<span id="cb16-12"><a href=""></a></span>
+<span id="cb16-13"><a href=""></a>    <span class="kw">def</span> add_two_ints_callback(<span class="va">self</span>, request, response):</span>
+<span id="cb16-14"><a href=""></a>        response.<span class="bu">sum</span> <span class="op">=</span> request.a <span class="op">+</span> request.b</span>
+<span id="cb16-15"><a href=""></a>        <span class="va">self</span>.get_logger().info(<span class="st">'Incoming request</span><span class="ch">\n</span><span class="st">a: </span><span class="sc">%d</span><span class="st"> b: </span><span class="sc">%d</span><span class="st">'</span> <span class="op">%</span> (request.a, request.b))</span>
+<span id="cb16-16"><a href=""></a></span>
+<span id="cb16-17"><a href=""></a>        <span class="cf">return</span> response</span>
+<span id="cb16-18"><a href=""></a></span>
+<span id="cb16-19"><a href=""></a></span>
+<span id="cb16-20"><a href=""></a><span class="kw">def</span> main():</span>
+<span id="cb16-21"><a href=""></a>    rclpy.init()</span>
+<span id="cb16-22"><a href=""></a></span>
+<span id="cb16-23"><a href=""></a>    minimal_service <span class="op">=</span> MinimalService()</span>
+<span id="cb16-24"><a href=""></a></span>
+<span id="cb16-25"><a href=""></a>    rclpy.spin(minimal_service)</span>
+<span id="cb16-26"><a href=""></a></span>
+<span id="cb16-27"><a href=""></a>    rclpy.shutdown()</span>
+<span id="cb16-28"><a href=""></a></span>
+<span id="cb16-29"><a href=""></a></span>
+<span id="cb16-30"><a href=""></a><span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">'__main__'</span>:</span>
+<span id="cb16-31"><a href=""></a>    main()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Add dependencies to the <code>package.xml</code>:</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode numberSource xml number-lines code-with-copy"><code class="sourceCode xml"><span id="cb17-1"><a href=""></a>&lt;<span class="kw">exec_depend</span>&gt;rclpy&lt;/<span class="kw">exec_depend</span>&gt;</span>
+<span id="cb17-2"><a href=""></a>&lt;<span class="kw">exec_depend</span>&gt;std_msgs&lt;/<span class="kw">exec_depend</span>&gt;</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Modify <code>setup.py</code>:</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href=""></a>entry_points<span class="op">=</span>{</span>
+<span id="cb18-2"><a href=""></a>        <span class="st">'console_scripts'</span>: [</span>
+<span id="cb18-3"><a href=""></a>                <span class="st">'service_server = py_service_example.service_server:main'</span>,</span>
+<span id="cb18-4"><a href=""></a>        ],</span>
+<span id="cb18-5"><a href=""></a>},</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+<h4 id="service-client">Service Client</h4>
+<div class="sourceCode" id="cb19"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href=""></a>client <span class="op">=</span> <span class="va">self</span>.create_client(SetPen, <span class="st">'set_pen'</span>)</span>
+<span id="cb19-2"><a href=""></a><span class="cf">while</span> <span class="kw">not</span> client.wait_for_service(timeout_sec<span class="op">=</span><span class="fl">1.0</span>):</span>
+<span id="cb19-3"><a href=""></a>    <span class="va">self</span>.get_logger().info(<span class="st">'Service not available, waiting again...'</span>)</span>
+<span id="cb19-4"><a href=""></a>request <span class="op">=</span> SetPen.Request()</span>
+<span id="cb19-5"><a href=""></a>request.r <span class="op">=</span> <span class="dv">255</span></span>
+<span id="cb19-6"><a href=""></a>request.g <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb19-7"><a href=""></a>request.b <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb19-8"><a href=""></a>request.width <span class="op">=</span> <span class="dv">5</span></span>
+<span id="cb19-9"><a href=""></a>request.off <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb19-10"><a href=""></a>future <span class="op">=</span> client.call_async(request)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<aside class="notes">
+<p>— SERVICE CLIENT CODE —</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href=""></a><span class="im">import</span> sys</span>
+<span id="cb20-2"><a href=""></a></span>
+<span id="cb20-3"><a href=""></a><span class="im">from</span> example_interfaces.srv <span class="im">import</span> AddTwoInts</span>
+<span id="cb20-4"><a href=""></a><span class="im">import</span> rclpy</span>
+<span id="cb20-5"><a href=""></a><span class="im">from</span> rclpy.node <span class="im">import</span> Node</span>
+<span id="cb20-6"><a href=""></a></span>
+<span id="cb20-7"><a href=""></a></span>
+<span id="cb20-8"><a href=""></a><span class="kw">class</span> MinimalClientAsync(Node):</span>
+<span id="cb20-9"><a href=""></a></span>
+<span id="cb20-10"><a href=""></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>):</span>
+<span id="cb20-11"><a href=""></a>        <span class="bu">super</span>().<span class="fu">__init__</span>(<span class="st">'minimal_client_async'</span>)</span>
+<span id="cb20-12"><a href=""></a>        <span class="va">self</span>.cli <span class="op">=</span> <span class="va">self</span>.create_client(AddTwoInts, <span class="st">'add_two_ints'</span>)</span>
+<span id="cb20-13"><a href=""></a>        <span class="cf">while</span> <span class="kw">not</span> <span class="va">self</span>.cli.wait_for_service(timeout_sec<span class="op">=</span><span class="fl">1.0</span>):</span>
+<span id="cb20-14"><a href=""></a>            <span class="va">self</span>.get_logger().info(<span class="st">'service not available, waiting again...'</span>)</span>
+<span id="cb20-15"><a href=""></a>        <span class="va">self</span>.req <span class="op">=</span> AddTwoInts.Request()</span>
+<span id="cb20-16"><a href=""></a></span>
+<span id="cb20-17"><a href=""></a>    <span class="kw">def</span> send_request(<span class="va">self</span>, a, b):</span>
+<span id="cb20-18"><a href=""></a>        <span class="va">self</span>.req.a <span class="op">=</span> a</span>
+<span id="cb20-19"><a href=""></a>        <span class="va">self</span>.req.b <span class="op">=</span> b</span>
+<span id="cb20-20"><a href=""></a>        <span class="cf">return</span> <span class="va">self</span>.cli.call_async(<span class="va">self</span>.req)</span>
+<span id="cb20-21"><a href=""></a></span>
+<span id="cb20-22"><a href=""></a></span>
+<span id="cb20-23"><a href=""></a><span class="kw">def</span> main():</span>
+<span id="cb20-24"><a href=""></a>    rclpy.init()</span>
+<span id="cb20-25"><a href=""></a></span>
+<span id="cb20-26"><a href=""></a>    minimal_client <span class="op">=</span> MinimalClientAsync()</span>
+<span id="cb20-27"><a href=""></a>    future <span class="op">=</span> minimal_client.send_request(<span class="bu">int</span>(sys.argv[<span class="dv">1</span>]), <span class="bu">int</span>(sys.argv[<span class="dv">2</span>]))</span>
+<span id="cb20-28"><a href=""></a>    rclpy.spin_until_future_complete(minimal_client, future)</span>
+<span id="cb20-29"><a href=""></a>    response <span class="op">=</span> future.result()</span>
+<span id="cb20-30"><a href=""></a>    minimal_client.get_logger().info(</span>
+<span id="cb20-31"><a href=""></a>        <span class="st">'Result of add_two_ints: for </span><span class="sc">%d</span><span class="st"> + </span><span class="sc">%d</span><span class="st"> = </span><span class="sc">%d</span><span class="st">'</span> <span class="op">%</span></span>
+<span id="cb20-32"><a href=""></a>        (<span class="bu">int</span>(sys.argv[<span class="dv">1</span>]), <span class="bu">int</span>(sys.argv[<span class="dv">2</span>]), response.<span class="bu">sum</span>))</span>
+<span id="cb20-33"><a href=""></a></span>
+<span id="cb20-34"><a href=""></a>    minimal_client.destroy_node()</span>
+<span id="cb20-35"><a href=""></a>    rclpy.shutdown()</span>
+<span id="cb20-36"><a href=""></a></span>
+<span id="cb20-37"><a href=""></a></span>
+<span id="cb20-38"><a href=""></a><span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">'__main__'</span>:</span>
+<span id="cb20-39"><a href=""></a>    main()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Modify <code>setup.py</code>:</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href=""></a>entry_points<span class="op">=</span>{</span>
+<span id="cb21-2"><a href=""></a>        <span class="st">'console_scripts'</span>: [</span>
+<span id="cb21-3"><a href=""></a>                <span class="st">'service_server = py_service_example.service_server:main'</span>,</span>
+<span id="cb21-4"><a href=""></a>                <span class="st">'service_client = py_service_example.service_client:main'</span>,</span>
+<span id="cb21-5"><a href=""></a>        ],</span>
+<span id="cb21-6"><a href=""></a>},</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+<aside class="notes">
+<p>You can run the service server and client in separate terminals:</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb22-1"><a href=""></a><span class="co"># In terminal 1</span></span>
+<span id="cb22-2"><a href=""></a><span class="ex">ros2</span> run itu_service_example service_server</span>
+<span id="cb22-3"><a href=""></a><span class="co"># In terminal 2</span></span>
+<span id="cb22-4"><a href=""></a><span class="ex">ros2</span> run itu_service_example service_client 3 5</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>You should see the server logging the incoming request and the client printing the result.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+</section>
+<section>
+<section id="fastapi-vs-ros-2" class="title-slide slide level1 agenda-slide center">
+<h1>FastAPI vs ROS 2</h1>
+<div class="agenda-heading">
+<p>Agenda</p>
+</div>
+<div class="agenda">
+<ol>
+<li><div class="agenda-inactive agenda-pre-active agenda-clickable">
+<a href="#/introduction">Introduction</a>
+</div></li>
+<li><div class="agenda-inactive agenda-pre-active agenda-clickable">
+<a href="#/first-steps-with-ros">First Steps With ROS</a>
+</div></li>
+<li><div class="agenda-inactive agenda-pre-active agenda-clickable">
+<a href="#/live-demo-simple-pubsub-node">Live Demo: Simple Pub/Sub Node</a>
+</div></li>
+<li><div class="agenda-active agenda-clickable">
+<a href="#/fastapi-vs-ros-2">FastAPI vs ROS 2</a>
+</div></li>
+<li><div class="agenda-inactive agenda-post-active agenda-clickable">
+<a href="#/hands-on-project">Hands-on Project</a>
+</div></li>
+<li><div class="agenda-inactive agenda-post-active agenda-clickable">
+<a href="#/wrap-up-feedback">Wrap-up &amp; Feedback</a>
+</div></li>
+</ol>
+</div>
+</section>
+<section id="package-snapshot" class="title-slide slide level2 center">
+<h2>Package Snapshot</h2>
+<p><code>lab_automation_pump</code> exposes:</p>
+<ul>
+<li>Action: <code>pump/step</code> (<code>PumpStep.action</code>) for timed operations</li>
+<li>Topic: <code>pump/state</code> (<code>PumpState.msg</code>) publishing current pump A state</li>
+<li>Cancellation = emergency stop</li>
+</ul>
+<aside class="notes">
+<p>This package simulates a laboratory automation pump, allowing control over its operation through ROS 2 actions and topics. The action <code>pump/step</code> enables timed pumping operations, while the topic <code>pump/state</code> provides real-time updates on the pump’s status. Additionally, the package supports cancellation of ongoing operations for emergency stops. Go through the code structure briefly.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="section-2" class="slide level3">
+<h3></h3>
+<h4 id="run-simulation">Run (simulation)</h4>
+<div class="sourceCode" id="cb23"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb23-1"><a href=""></a><span class="ex">colcon</span> build <span class="at">--packages-select</span> lab_automation_pump</span>
+<span id="cb23-2"><a href=""></a><span class="bu">source</span> install/setup.bash</span>
+<span id="cb23-3"><a href=""></a><span class="ex">ros2</span> launch lab_automation_pump pump.launch.py simulated:=true</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<h4 id="send-a-goal">Send a goal</h4>
+<div class="sourceCode" id="cb24"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb24-1"><a href=""></a><span class="ex">ros2</span> action send_goal /pump/step lab_automation_pump_interfaces/action/PumpStep <span class="st">"{state: true, speed: 2000, dir: true, duration_ms: 3000}"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<h4 id="cancel">Cancel</h4>
+<div class="sourceCode" id="cb25"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb25-1"><a href=""></a><span class="ex">ros2</span> action cancel /pump/step</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<h4 id="echo-state">Echo state</h4>
+<div class="sourceCode" id="cb26"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb26-1"><a href=""></a><span class="ex">ros2</span> topic echo /pump/state</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+
+<section id="action-anatomy" class="title-slide slide level2 center">
+<h2>Action Anatomy</h2>
+<p>Why an Action?</p>
+<div class="fragment">
+<ul>
+<li>Long‑running (timed) pump operations</li>
+<li>Feedback for UI / CLI progress</li>
+<li>Cancel for emergency stop</li>
+</ul>
+<aside class="notes">
+<p>Ask them why an Action is used here instead of a Service or Topic. Actions are suitable for operations that take time to complete and require feedback or the ability to cancel. In this case, pumping operations can take several seconds, and we want to provide feedback on progress and allow for cancellation in case of emergencies.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</div>
+</section>
+<section class="slide level3">
+
+<p><code>PumpStep.action</code> (conceptual):</p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode numberSource text number-lines code-with-copy"><code class="sourceCode"><span id="cb27-1"><a href=""></a># Goal</span>
+<span id="cb27-2"><a href=""></a>bool state      # enable (true) or disable (false)</span>
+<span id="cb27-3"><a href=""></a>int32 speed     # firmware speed value</span>
+<span id="cb27-4"><a href=""></a>bool dir        # true forward / false reverse</span>
+<span id="cb27-5"><a href=""></a>int32 duration_ms</span>
+<span id="cb27-6"><a href=""></a>---</span>
+<span id="cb27-7"><a href=""></a># Result</span>
+<span id="cb27-8"><a href=""></a>bool success</span>
+<span id="cb27-9"><a href=""></a>string message</span>
+<span id="cb27-10"><a href=""></a>---</span>
+<span id="cb27-11"><a href=""></a># Feedback</span>
+<span id="cb27-12"><a href=""></a>float32 progress_pct    # 0.0 -&gt; 100.0</span>
+<span id="cb27-13"><a href=""></a>int32 elapsed_ms</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+
+<section id="topic-state" class="title-slide slide level2 center">
+<h2>Topic State</h2>
+<p>State message (simplified):</p>
+<div class="sourceCode" id="cb28"><pre class="sourceCode numberSource text number-lines code-with-copy"><code class="sourceCode"><span id="cb28-1"><a href=""></a>bool running</span>
+<span id="cb28-2"><a href=""></a>int32 speed</span>
+<span id="cb28-3"><a href=""></a>bool dir</span>
+<span id="cb28-4"><a href=""></a>int32 remaining_ms</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Publishing rate parameter: <code>state_publish_rate_hz</code> (default 2.0).</p>
+<p>Use it for dashboards &amp; health monitoring (low frequency).</p>
+</section>
+
+<section id="simulation-vs-hardware" class="title-slide slide level2 center">
+<h2>Simulation vs Hardware</h2>
+<p>Parameter controls:</p>
+<ul>
+<li><code>simulated</code>: mock driver when true</li>
+<li><code>device_id</code>: serial identifier or auto-detect</li>
+<li><code>feedback_rate_hz</code>: action feedback granularity</li>
+</ul>
+<p>Design implication: Keep abstraction boundary so REST layer does not depend on simulated/hardware choice.</p>
+</section>
+</section>
+<section>
+<section id="hands-on-project" class="title-slide slide level1 agenda-slide center">
+<h1>Hands-on Project</h1>
+<div class="agenda-heading">
+<p>Agenda</p>
+</div>
+<div class="agenda">
+<ol>
+<li><div class="agenda-inactive agenda-pre-active agenda-clickable">
+<a href="#/introduction">Introduction</a>
+</div></li>
+<li><div class="agenda-inactive agenda-pre-active agenda-clickable">
+<a href="#/first-steps-with-ros">First Steps With ROS</a>
+</div></li>
+<li><div class="agenda-inactive agenda-pre-active agenda-clickable">
+<a href="#/live-demo-simple-pubsub-node">Live Demo: Simple Pub/Sub Node</a>
+</div></li>
+<li><div class="agenda-inactive agenda-pre-active agenda-clickable">
+<a href="#/fastapi-vs-ros-2">FastAPI vs ROS 2</a>
+</div></li>
+<li><div class="agenda-active agenda-clickable">
+<a href="#/hands-on-project">Hands-on Project</a>
+</div></li>
+<li><div class="agenda-inactive agenda-post-active agenda-clickable">
+<a href="#/wrap-up-feedback">Wrap-up &amp; Feedback</a>
+</div></li>
+</ol>
+</div>
+</section>
+<section id="proposed-exercises" class="title-slide slide level2 center">
+<h2>Proposed Exercises</h2>
+<ul>
+<li>Launch multiple nodes to control multiple pumps.</li>
+<li>Create a new node to publish information about the color sensor.</li>
+<li>Create a logic node that orchestrates when to use the pumps and how.
+<ul>
+<li>The logic is about opening the different pumps to mix the colors from each one and obtain the desired color.</li>
+<li>For example, you could have pumps with primary colors (Red, Yellow, Blue) and mix them to create secondary colors (Green, Orange, Purple).</li>
+<li>The color sensor would be used to verify the resulting color of the mix.</li>
+</ul></li>
+</ul>
+</section>
+
+<section id="time-to-work-on-your-projects" class="title-slide slide level2 center">
+<h2>Time to Work on Your Projects</h2>
+<p>Feel free to use ROS 2 or FastAPI for your integration.</p>
+<p><strong>References:</strong></p>
+<ul>
+<li><a href="https://docs.ros.org/en/humble/index.html">ROS 2 Documentation</a></li>
+<li><a href="https://docs.ros.org/en/humble/Tutorials.html">ROS 2 Tutorials</a></li>
+<li><a href="https://github.com/ubuntu-robotics/ros2_cheats_sheet/blob/master/cli/cli_cheats_sheet.pdf">ROS 2 CLI Cheat Sheet</a></li>
+<li><a href="https://devhints.io/bash">Ubuntu Bash Terminal Cheat Sheet</a></li>
+</ul>
+<aside class="notes">
+<p>Encourage collaboration and questions. Walk around to assist as needed. Tell them that they can take breaks as needed.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+</section>
+<section>
+<section id="wrap-up-feedback" class="title-slide slide level1 agenda-slide center">
+<h1>Wrap-up &amp; Feedback</h1>
+<div class="agenda-heading">
+<p>Agenda</p>
+</div>
+<div class="agenda">
+<ol>
+<li><div class="agenda-inactive agenda-pre-active agenda-clickable">
+<a href="#/introduction">Introduction</a>
+</div></li>
+<li><div class="agenda-inactive agenda-pre-active agenda-clickable">
+<a href="#/first-steps-with-ros">First Steps With ROS</a>
+</div></li>
+<li><div class="agenda-inactive agenda-pre-active agenda-clickable">
+<a href="#/live-demo-simple-pubsub-node">Live Demo: Simple Pub/Sub Node</a>
+</div></li>
+<li><div class="agenda-inactive agenda-pre-active agenda-clickable">
+<a href="#/fastapi-vs-ros-2">FastAPI vs ROS 2</a>
+</div></li>
+<li><div class="agenda-inactive agenda-pre-active agenda-clickable">
+<a href="#/hands-on-project">Hands-on Project</a>
+</div></li>
+<li><div class="agenda-active agenda-clickable">
+<a href="#/wrap-up-feedback">Wrap-up &amp; Feedback</a>
+</div></li>
+</ol>
+</div>
+</section>
+<section id="revisiting-the-computation-graph" class="title-slide slide level2 center">
+<h2>Revisiting The Computation Graph</h2>
+
+<img data-src="media/imgs/ros2_computation_graph.png" class="quarto-figure quarto-figure-center r-stretch" style="width:80.0%"></section>
+
+
+
+<section id="feedback" class="title-slide slide level2 center">
+<h2>Feedback</h2>
+<div style="position: relative; padding-bottom: 56.25%; padding-top: 35px; height: 0; overflow: hidden;">
+<iframe sandbox="allow-scripts allow-same-origin allow-presentation" allowfullscreen="true" allowtransparency="true" frameborder="0" height="315" src="https://www.mentimeter.com/app/presentation/alyr3uu2r8wxepdoaabqjoizpjuris5w/embed" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" width="420">
+</iframe>
+</div>
+</section>
+<section id="thank-you-tak-for-i-dag-gracias" class="slide level3 center" data-background-color="#FBD403">
+<h3><strong>Thank You / Tak for i dag / Gracias</strong></h3>
+<p>Remember that we have only explored the basics of ROS 2 today. There is a vast ecosystem and many advanced features to discover.</p>
+<p>Feel free to reach out if you have any questions or need further assistance with ROS 2 or your projects!</p>
+<div class="contact-card">
+<div class="columns">
+<div class="column" style="width:40%;">
+<p><img data-src="media/imgs/contact-card-img.jpeg" style="height:80.0%"></p>
+</div><div class="column" style="width:60%;">
+<h4 id="alejandro-lorite-mora">Alejandro Lorite Mora</h4>
+<ul>
+<li><i class="fa-solid fa-envelope fa-5xs" aria-label="envelope"></i> <a href="mailto:lori@itu.dk">lori@itu.dk</a></li>
+<li><i class="fa-brands fa-github fa-5xs" aria-label="github"></i> <a href="https://github.com/Lorite"><span class="citation" data-cites="Lorite">@Lorite</span></a></li>
+<li><i class="fa-brands fa-linkedin fa-5xs" aria-label="linkedin"></i> <a href="https://www.linkedin.com/in/alejandroloritemora/">Alejandro Lorite Mora</a></li>
+<li><i class="fa-solid fa-school fa-5xs" aria-label="school"></i> <a href="https://reallab.itu.dk/">REAL Lab (ITU)</a></li>
+</ul>
+</div></div>
+</div>
+<p>slides made with <a href="https://quarto.org/">Quarto</a> + <a href="https://revealjs.com/">reveal.js</a> 🎉</p>
+</section>
+
+</section>
+    </div>
+  <div class="quarto-auto-generated-content" style="display: none;">
+<p><img src="https://itu.dk/-/media/DK/Om-ITU/Presse/Pressebilleder/Logoer/ITU_logo_UK_800x88-jpg.jpg" class="slide-logo"></p>
+<div class="footer footer-default">
+<p>December 9, 2025 Robot programming in ROS 2</p>
+</div>
+</div></div>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script>
+  <script src="2025-itu-ros2_files/libs/revealjs/dist/reveal.js"></script>
+  <!-- reveal.js plugins -->
+  <script src="2025-itu-ros2_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
+  <script src="2025-itu-ros2_files/libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
+  <script src="2025-itu-ros2_files/libs/revealjs/plugin/reveal-menu/menu.js"></script>
+  <script src="2025-itu-ros2_files/libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
+  <script src="2025-itu-ros2_files/libs/revealjs/plugin/reveal-chalkboard/plugin.js"></script>
+  <script src="2025-itu-ros2_files/libs/revealjs/plugin/quarto-support/support.js"></script>
+  
+
+  <script src="2025-itu-ros2_files/libs/revealjs/plugin/notes/notes.js"></script>
+  <script src="2025-itu-ros2_files/libs/revealjs/plugin/search/search.js"></script>
+  <script src="2025-itu-ros2_files/libs/revealjs/plugin/zoom/zoom.js"></script>
+  <script src="2025-itu-ros2_files/libs/revealjs/plugin/math/math.js"></script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://revealjs.com/config/
+      Reveal.initialize({
+'controlsAuto': true,
+'previewLinksAuto': false,
+'pdfSeparateFragments': false,
+'autoAnimateEasing': "ease",
+'autoAnimateDuration': 1,
+'autoAnimateUnmatched': true,
+'jumpToSlide': true,
+'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleScrollView(event)\"><kbd>r</kbd> Scroll View Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"5\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleChalkboard(event)\"><kbd>b</kbd> Toggle Chalkboard</a></li>\n<li class=\"slide-tool-item\" data-item=\"6\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleNotesCanvas(event)\"><kbd>c</kbd> Toggle Notes Canvas</a></li>\n<li class=\"slide-tool-item\" data-item=\"7\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.downloadDrawings(event)\"><kbd>d</kbd> Download Drawings</a></li>\n<li class=\"slide-tool-item\" data-item=\"8\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true},
+'chalkboard': {"buttons":true,"theme":"whiteboard"},
+'smaller': false,
+ 
+        // Display controls in the bottom right corner
+        controls: false,
+
+        // Help the user learn the controls by providing hints, for example by
+        // bouncing the down arrow when they first encounter a vertical slide
+        controlsTutorial: false,
+
+        // Determines where controls appear, "edges" or "bottom-right"
+        controlsLayout: 'edges',
+
+        // Visibility rule for backwards navigation arrows; "faded", "hidden"
+        // or "visible"
+        controlsBackArrows: 'faded',
+
+        // Display a presentation progress bar
+        progress: true,
+
+        // Display the page number of the current slide
+        slideNumber: 'c/t',
+
+        // 'all', 'print', or 'speaker'
+        showSlideNumber: 'all',
+
+        // Add the current slide number to the URL hash so that reloading the
+        // page/copying the URL will return you to the same slide
+        hash: true,
+
+        // Start with 1 for the hash rather than 0
+        hashOneBasedIndex: false,
+
+        // Flags if we should monitor the hash and change slides accordingly
+        respondToHashChanges: true,
+
+        // Push each slide change to the browser history
+        history: true,
+
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+
+        // Enable the slide overview mode
+        overview: true,
+
+        // Disables the default reveal.js slide layout (scaling and centering)
+        // so that you can use custom CSS layout
+        disableLayout: false,
+
+        // Vertical centering of slides
+        center: false,
+
+        // Enables touch navigation on devices with touch input
+        touch: true,
+
+        // Loop the presentation
+        loop: false,
+
+        // Change the presentation direction to be RTL
+        rtl: false,
+
+        // see https://revealjs.com/vertical-slides/#navigation-mode
+        navigationMode: 'linear',
+
+        // Randomizes the order of slides each time the presentation loads
+        shuffle: false,
+
+        // Turns fragments on and off globally
+        fragments: true,
+
+        // Flags whether to include the current fragment in the URL,
+        // so that reloading brings you to the same fragment position
+        fragmentInURL: false,
+
+        // Flags if the presentation is running in an embedded mode,
+        // i.e. contained within a limited portion of the screen
+        embedded: false,
+
+        // Flags if we should show a help overlay when the questionmark
+        // key is pressed
+        help: true,
+
+        // Flags if it should be possible to pause the presentation (blackout)
+        pause: true,
+
+        // Flags if speaker notes should be visible to all viewers
+        showNotes: false,
+
+        // Global override for autoplaying embedded media (null/true/false)
+        autoPlayMedia: null,
+
+        // Global override for preloading lazy-loaded iframes (null/true/false)
+        preloadIframes: null,
+
+        // Number of milliseconds between automatically proceeding to the
+        // next slide, disabled when set to 0, this value can be overwritten
+        // by using a data-autoslide attribute on your slides
+        autoSlide: 0,
+
+        // Stop auto-sliding after user input
+        autoSlideStoppable: true,
+
+        // Use this method for navigation when auto-sliding
+        autoSlideMethod: null,
+
+        // Specify the average time in seconds that you think you will spend
+        // presenting each slide. This is used to show a pacing timer in the
+        // speaker view
+        defaultTiming: null,
+
+        // Enable slide navigation via mouse wheel
+        mouseWheel: false,
+
+        // The display mode that will be used to show slides
+        display: 'block',
+
+        // Hide cursor if inactive
+        hideInactiveCursor: true,
+
+        // Time before the cursor is hidden (in ms)
+        hideCursorTime: 5000,
+
+        // Opens links in an iframe preview overlay
+        previewLinks: true,
+
+        // Transition style (none/fade/slide/convex/concave/zoom)
+        transition: 'slide',
+
+        // Transition speed (default/fast/slow)
+        transitionSpeed: 'default',
+
+        // Transition style for full page slide backgrounds
+        // (none/fade/slide/convex/concave/zoom)
+        backgroundTransition: 'none',
+
+        // Number of slides away from the current that are visible
+        viewDistance: 3,
+
+        // Number of slides away from the current that are visible on mobile
+        // devices. It is advisable to set this to a lower number than
+        // viewDistance in order to save resources.
+        mobileViewDistance: 2,
+
+        // The "normal" size of the presentation, aspect ratio will be preserved
+        // when the presentation is scaled to fit different resolutions. Can be
+        // specified using percentage units.
+        width: 1050,
+
+        height: 700,
+
+        // Factor of the display size that should remain empty around the content
+        margin: 0.1,
+
+        math: {
+          mathjax: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js',
+          config: 'TeX-AMS_HTML-full',
+          tex2jax: {
+            inlineMath: [['\\(','\\)']],
+            displayMath: [['\\[','\\]']],
+            balanceBraces: true,
+            processEscapes: false,
+            processRefs: true,
+            processEnvironments: true,
+            preview: 'TeX',
+            skipTags: ['script','noscript','style','textarea','pre','code'],
+            ignoreClass: 'tex2jax_ignore',
+            processClass: 'tex2jax_process'
+          },
+        },
+
+        // reveal.js plugins
+        plugins: [QuartoLineHighlight, PdfExport, RevealMenu, RevealChalkboard, QuartoSupport,
+
+          RevealMath,
+          RevealNotes,
+          RevealSearch,
+          RevealZoom
+        ]
+      });
+    </script>
+    <script id="quarto-html-after-body" type="application/javascript">
+      window.document.addEventListener("DOMContentLoaded", function (event) {
+        const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")
+        tabsets.forEach(function(tabset) {
+          const tabby = new Tabby('#' + tabset.id);
+        });
+        const isCodeAnnotation = (el) => {
+          for (const clz of el.classList) {
+            if (clz.startsWith('code-annotation-')) {                     
+              return true;
+            }
+          }
+          return false;
+        }
+        const onCopySuccess = function(e) {
+          // button target
+          const button = e.trigger;
+          // don't keep focus
+          button.blur();
+          // flash "checked"
+          button.classList.add('code-copy-button-checked');
+          var currentTitle = button.getAttribute("title");
+          button.setAttribute("title", "Copied!");
+          let tooltip;
+          if (window.bootstrap) {
+            button.setAttribute("data-bs-toggle", "tooltip");
+            button.setAttribute("data-bs-placement", "left");
+            button.setAttribute("data-bs-title", "Copied!");
+            tooltip = new bootstrap.Tooltip(button, 
+              { trigger: "manual", 
+                customClass: "code-copy-button-tooltip",
+                offset: [0, -8]});
+            tooltip.show();    
+          }
+          setTimeout(function() {
+            if (tooltip) {
+              tooltip.hide();
+              button.removeAttribute("data-bs-title");
+              button.removeAttribute("data-bs-toggle");
+              button.removeAttribute("data-bs-placement");
+            }
+            button.setAttribute("title", currentTitle);
+            button.classList.remove('code-copy-button-checked');
+          }, 1000);
+          // clear code selection
+          e.clearSelection();
+        }
+        const getTextToCopy = function(trigger) {
+            const codeEl = trigger.previousElementSibling.cloneNode(true);
+            for (const childEl of codeEl.children) {
+              if (isCodeAnnotation(childEl)) {
+                childEl.remove();
+              }
+            }
+            return codeEl.innerText;
+        }
+        const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+          text: getTextToCopy
+        });
+        clipboard.on('success', onCopySuccess);
+        if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+          const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+            text: getTextToCopy,
+            container: window.document.getElementById('quarto-embedded-source-code-modal')
+          });
+          clipboardModal.on('success', onCopySuccess);
+        }
+          var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+          var mailtoRegex = new RegExp(/^mailto:/);
+            var filterRegex = new RegExp('/' + window.location.host + '/');
+          var isInternal = (href) => {
+              return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+          }
+          // Inspect non-navigation links and adorn them if external
+         var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+          for (var i=0; i<links.length; i++) {
+            const link = links[i];
+            if (!isInternal(link.href)) {
+              // undo the damage that might have been done by quarto-nav.js in the case of
+              // links that we want to consider external
+              if (link.dataset.originalHref !== undefined) {
+                link.href = link.dataset.originalHref;
+              }
+            }
+          }
+        function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+          const config = {
+            allowHTML: true,
+            maxWidth: 500,
+            delay: 100,
+            arrow: false,
+            appendTo: function(el) {
+                return el.closest('section.slide') || el.parentElement;
+            },
+            interactive: true,
+            interactiveBorder: 10,
+            theme: 'light-border',
+            placement: 'bottom-start',
+          };
+          if (contentFn) {
+            config.content = contentFn;
+          }
+          if (onTriggerFn) {
+            config.onTrigger = onTriggerFn;
+          }
+          if (onUntriggerFn) {
+            config.onUntrigger = onUntriggerFn;
+          }
+            config['offset'] = [0,0];
+            config['maxWidth'] = 700;
+          window.tippy(el, config); 
+        }
+        const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+        for (var i=0; i<noterefs.length; i++) {
+          const ref = noterefs[i];
+          tippyHover(ref, function() {
+            // use id or data attribute instead here
+            let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+            try { href = new URL(href).hash; } catch {}
+            const id = href.replace(/^#\/?/, "");
+            const note = window.document.getElementById(id);
+            if (note) {
+              return note.innerHTML;
+            } else {
+              return "";
+            }
+          });
+        }
+        const findCites = (el) => {
+          const parentEl = el.parentElement;
+          if (parentEl) {
+            const cites = parentEl.dataset.cites;
+            if (cites) {
+              return {
+                el,
+                cites: cites.split(' ')
+              };
+            } else {
+              return findCites(el.parentElement)
+            }
+          } else {
+            return undefined;
+          }
+        };
+        var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+        for (var i=0; i<bibliorefs.length; i++) {
+          const ref = bibliorefs[i];
+          const citeInfo = findCites(ref);
+          if (citeInfo) {
+            tippyHover(citeInfo.el, function() {
+              var popup = window.document.createElement('div');
+              citeInfo.cites.forEach(function(cite) {
+                var citeDiv = window.document.createElement('div');
+                citeDiv.classList.add('hanging-indent');
+                citeDiv.classList.add('csl-entry');
+                var biblioDiv = window.document.getElementById('ref-' + cite);
+                if (biblioDiv) {
+                  citeDiv.innerHTML = biblioDiv.innerHTML;
+                }
+                popup.appendChild(citeDiv);
+              });
+              return popup.innerHTML;
+            });
+          }
+        }
+      });
+      </script>
+    
+
+</body></html>

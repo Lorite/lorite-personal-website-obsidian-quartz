@@ -45,12 +45,21 @@ const argv = yargs(hideBin(process.argv))
     default: true,
     describe: "Clean destination before syncing",
   })
+  .option("fixed", {
+    alias: "f",
+    type: "string",
+    default: "content_fixed",
+    describe:
+      "Optional folder to merge into destination after sync (set empty string to disable)",
+  })
   .help()
   .parseSync()
 
 const sourceRoot = path.resolve(argv.source)
 const destRoot = path.resolve(argv.dest)
 const destAssetRoot = path.join(destRoot, argv.assets)
+const fixedRootRaw = typeof argv.fixed === "string" ? argv.fixed.trim() : ""
+const fixedRoot = fixedRootRaw.length > 0 ? path.resolve(fixedRootRaw) : ""
 
 const ASSET_EXTS = new Set([
   ".png",
@@ -238,6 +247,29 @@ function resolveNoteDestination(srcFile: string, frontmatterPath?: unknown) {
 async function copyFile(src: string, dest: string) {
   await fs.promises.mkdir(path.dirname(dest), { recursive: true })
   await fs.promises.copyFile(src, dest)
+}
+
+async function copyDirectoryContents(srcDir: string, destDir: string): Promise<number> {
+  let copiedFiles = 0
+  const entries = await fs.promises.readdir(srcDir, { withFileTypes: true })
+  await fs.promises.mkdir(destDir, { recursive: true })
+
+  for (const entry of entries) {
+    const srcPath = path.join(srcDir, entry.name)
+    const destPath = path.join(destDir, entry.name)
+
+    if (entry.isDirectory()) {
+      copiedFiles += await copyDirectoryContents(srcPath, destPath)
+      continue
+    }
+
+    if (entry.isFile()) {
+      await copyFile(srcPath, destPath)
+      copiedFiles += 1
+    }
+  }
+
+  return copiedFiles
 }
 
 function expandIgnorePatterns(patterns: string[]): string[] {
@@ -689,6 +721,17 @@ async function sync() {
   // }
 
   // Summary logs
+  if (fixedRoot) {
+    if (path.resolve(fixedRoot) === path.resolve(destRoot)) {
+      console.warn("⚠️  'fixed' folder equals destination; skipping fixed-content merge.")
+    } else if (!(await pathExists(fixedRoot))) {
+      console.warn(`⚠️  Fixed folder '${fixedRoot}' not found; skipping merge.`)
+    } else {
+      const fixedCopied = await copyDirectoryContents(fixedRoot, destRoot)
+      console.log(`📦 Merged ${fixedCopied} files from ${fixedRoot} into ${destRoot}`)
+    }
+  }
+
   console.log(
     `📁 Folder indexes created: ${folderIndexCount} (total items: ${folderIndexItemsTotal})`,
   )
