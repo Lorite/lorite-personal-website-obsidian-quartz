@@ -49,8 +49,7 @@ const argv = yargs(hideBin(process.argv))
     alias: "f",
     type: "string",
     default: "content_fixed",
-    describe:
-      "Optional folder to merge into destination after sync (set empty string to disable)",
+    describe: "Optional folder to merge into destination after sync (set empty string to disable)",
   })
   .help()
   .parseSync()
