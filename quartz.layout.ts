@@ -112,6 +112,10 @@ export const defaultContentPageLayout: PageLayout = {
         categoryId: "DIC_kwDOQpBfoc4C0BmP",
         // from data-lang
         lang: "en",
+        // Use official Giscus themes to keep contrast readable in dark mode
+        themeUrl: "https://giscus.app/themes",
+        lightTheme: "light",
+        darkTheme: "dark_dimmed",
       },
     }),
   ],
