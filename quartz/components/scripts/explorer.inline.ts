@@ -21,6 +21,76 @@ type FolderState = {
 }
 
 let currentExplorerState: Array<FolderState>
+
+function setupWheelScrolling(scrollContainer: HTMLElement) {
+  const onWheel = (evt: WheelEvent) => {
+    const { scrollTop, scrollHeight, clientHeight } = scrollContainer
+    const deltaY = evt.deltaY
+    const nextScrollTop = scrollTop + deltaY
+
+    const canScroll = scrollHeight > clientHeight
+    const canScrollDown = deltaY > 0 && nextScrollTop < scrollHeight - clientHeight
+    const canScrollUp = deltaY < 0 && nextScrollTop > 0
+
+    // Only consume wheel events when this list can continue scrolling in that direction.
+    if (canScroll && (canScrollDown || canScrollUp)) {
+      scrollContainer.scrollTop = nextScrollTop
+      evt.preventDefault()
+      evt.stopPropagation()
+    }
+  }
+
+  scrollContainer.addEventListener("wheel", onWheel, { passive: false })
+  window.addCleanup(() => scrollContainer.removeEventListener("wheel", onWheel))
+}
+
+function setupTouchScrolling(scrollContainer: HTMLElement) {
+  let lastTouchY: number | null = null
+
+  const onTouchStart = (evt: TouchEvent) => {
+    if (evt.touches.length !== 1) return
+    lastTouchY = evt.touches[0]?.clientY ?? null
+  }
+
+  const onTouchMove = (evt: TouchEvent) => {
+    if (evt.touches.length !== 1 || lastTouchY === null) return
+
+    const currentTouchY = evt.touches[0]?.clientY
+    if (currentTouchY === undefined) return
+
+    const deltaY = lastTouchY - currentTouchY
+    const { scrollTop, scrollHeight, clientHeight } = scrollContainer
+    const nextScrollTop = scrollTop + deltaY
+
+    const canScroll = scrollHeight > clientHeight
+    const canScrollDown = deltaY > 0 && nextScrollTop < scrollHeight - clientHeight
+    const canScrollUp = deltaY < 0 && nextScrollTop > 0
+
+    if (canScroll && (canScrollDown || canScrollUp)) {
+      scrollContainer.scrollTop = nextScrollTop
+      evt.preventDefault()
+      evt.stopPropagation()
+      lastTouchY = currentTouchY
+    }
+  }
+
+  const onTouchEnd = () => {
+    lastTouchY = null
+  }
+
+  scrollContainer.addEventListener("touchstart", onTouchStart, { passive: true })
+  scrollContainer.addEventListener("touchmove", onTouchMove, { passive: false })
+  scrollContainer.addEventListener("touchend", onTouchEnd)
+  scrollContainer.addEventListener("touchcancel", onTouchEnd)
+
+  window.addCleanup(() => {
+    scrollContainer.removeEventListener("touchstart", onTouchStart)
+    scrollContainer.removeEventListener("touchmove", onTouchMove)
+    scrollContainer.removeEventListener("touchend", onTouchEnd)
+    scrollContainer.removeEventListener("touchcancel", onTouchEnd)
+  })
+}
+
 function toggleExplorer(this: HTMLElement) {
   const nearestExplorer = this.closest(".explorer") as HTMLElement
   if (!nearestExplorer) return
@@ -232,6 +302,9 @@ async function setupExplorer(currentSlug: FullSlug) {
 
     const explorerUl = explorer.querySelector(".explorer-ul")
     if (!explorerUl) continue
+
+    setupWheelScrolling(explorerUl as HTMLElement)
+    setupTouchScrolling(explorerUl as HTMLElement)
 
     // Create and insert new content
     const fragment = document.createDocumentFragment()
