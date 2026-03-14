@@ -1,4 +1,4 @@
 public
 node_modules
 .quartz-cache
-content_fixed
+quartz/static/slides
