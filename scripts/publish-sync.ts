@@ -374,6 +374,28 @@ type NoteMeta = {
   updatedTS: number
   collectionRoot?: string
   personalRating?: number
+  itemType?: string
+}
+
+function humanizeItemType(itemType?: string): string {
+  if (!itemType) return ""
+  return itemType
+    .trim()
+    .replace(/[_-]+/g, " ")
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .replace(/\s+/g, " ")
+    .toLowerCase()
+}
+
+function isResearchMediaFolder(folderRel: string): boolean {
+  return folderRel === "media/research" || folderRel.startsWith("media/research/")
+}
+
+function getDisplayTitle(note: NoteMeta): string {
+  if (!isResearchMediaFolder(note.srcFolderRel)) return note.title
+  const itemTypeLabel = humanizeItemType(note.itemType)
+  if (!itemTypeLabel) return note.title
+  return `${note.title} (${itemTypeLabel})`
 }
 
 async function generateCollectionIndex(
@@ -401,6 +423,7 @@ async function generateCollectionIndex(
   lines.push(`${title} from newest to oldest:`)
   lines.push("")
   for (const n of listNotes) {
+    const displayTitle = getDisplayTitle(n)
     const ratingColor = getRatingColor(n.personalRating)
     const ratingText =
       n.personalRating !== undefined && n.personalRating !== 0 ? `${n.personalRating}/10` : ""
@@ -409,18 +432,18 @@ async function generateCollectionIndex(
       : ""
 
     if (n.mode === "external" && n.externalUrl) {
-      lines.push(`- [${n.title}](${n.externalUrl})${ratingDisplayFormatted}`)
+      lines.push(`- [${displayTitle}](${n.externalUrl})${ratingDisplayFormatted}`)
     } else if (n.mode === "full") {
       // For index.md files, use folder path; otherwise use title
       if (path.basename(n.destPath).toLowerCase() === "index.md") {
         const folderPath = n.folderRel.replace(/\\/g, "/")
         lines.push(`- [[${folderPath}/]]${ratingDisplayFormatted}`)
       } else {
-        lines.push(`- [[${n.title}]]${ratingDisplayFormatted}`)
+        lines.push(`- [[${n.title}|${displayTitle}]]${ratingDisplayFormatted}`)
       }
     } else {
       // title-only: show plain text entry
-      lines.push(`- ${n.title}${ratingDisplayFormatted}`)
+      lines.push(`- ${displayTitle}${ratingDisplayFormatted}`)
     }
   }
 
@@ -543,6 +566,13 @@ async function sync() {
       if (!Number.isNaN(parsed_rating)) personalRating = parsed_rating
     }
 
+    // Extract item_type if present
+    const itemTypeRaw = parsed.data.item_type
+    const itemType =
+      typeof itemTypeRaw === "string" && itemTypeRaw.trim().length > 0
+        ? itemTypeRaw.trim()
+        : undefined
+
     const updatedRaw = (parsed.data.updated as unknown) ?? null
     let updatedTS = 0
     if (typeof updatedRaw === "string") {
@@ -578,6 +608,7 @@ async function sync() {
       updatedTS,
       collectionRoot: collectionRoot || undefined,
       personalRating,
+      itemType,
     }
 
     // Add to both the actual folder and the collection root (if different)
