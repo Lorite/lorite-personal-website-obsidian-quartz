@@ -1,0 +1,25 @@
+# Keep stale/generated artifacts and local cruft out of the image built by `COPY . .`.
+# node_modules: installed cleanly via `npm ci` in the deps stage; copying the local one over it
+#   risks shipping a mismatched/host-specific install.
+node_modules
+
+# Generated at build/runtime — must not be baked in stale:
+#   public  -> emitted by `npx quartz build`
+#   content -> synced from the mounted vault (NOTES_SOURCE) at container start
+public
+content
+
+# Caches / build metadata
+.quartz-cache
+quartz/.quartz-cache
+tsconfig.tsbuildinfo
+prof
+
+# VCS and local tooling
+.git
+.github
+.vscode
+.DS_Store
+
+# Private notes never published
+private

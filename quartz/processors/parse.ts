@@ -11,7 +11,6 @@ import { FilePath, QUARTZ, slugifyFilePath } from "../util/path"
 import path from "path"
 import workerpool, { Promise as WorkerPromise } from "workerpool"
 import { QuartzLogger } from "../util/log"
-import { trace } from "../util/trace"
 import { BuildCtx, WorkerSerializableBuildCtx } from "../util/ctx"
 import { styleText } from "util"
 
@@ -112,7 +111,14 @@ export function createFileParser(ctx: BuildCtx, fps: FilePath[]) {
           console.log(`[markdown] ${fp} -> ${file.data.slug} (${perf.timeSince()})`)
         }
       } catch (err) {
-        trace(`\nFailed to process markdown \`${fp}\``, err as Error)
+        // Skip this file instead of aborting the whole build: one malformed note should never
+        // take the entire site down (e.g. a page returning 404 because index.html never emitted).
+        console.warn(
+          styleText(
+            "yellow",
+            `\nWarning: skipping \`${fp}\` — failed to process markdown: ${(err as Error).message}`,
+          ),
+        )
       }
     }
 
@@ -134,7 +140,13 @@ export function createMarkdownParser(ctx: BuildCtx, mdContent: MarkdownContent[]
           console.log(`[html] ${file.data.slug} (${perf.timeSince()})`)
         }
       } catch (err) {
-        trace(`\nFailed to process html \`${file.data.filePath}\``, err as Error)
+        // Skip this file instead of aborting the whole build (see createFileParser above).
+        console.warn(
+          styleText(
+            "yellow",
+            `\nWarning: skipping \`${file.data.filePath}\` — failed to process html: ${(err as Error).message}`,
+          ),
+        )
       }
     }
 
