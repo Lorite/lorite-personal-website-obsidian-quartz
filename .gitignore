@@ -1,5 +1,4 @@
 .DS_Store
-.gitignore
 node_modules
 public
 prof
@@ -11,3 +10,9 @@ private/
 replit.nix
 .quartz/
 quartz/cli/tui/dist/
+# NOTE: content/ is synced from the private Obsidian notes repo at build time (publish-sync) and is
+# intentionally NOT gitignored. Quartz v5 discovers content with globby `gitignore: true`, so ignoring
+# content/ would make the build find 0 files (v4 used `gitignore: false` and did ignore it). Synced
+# content stays untracked (never `git add` it); only content/.gitkeep is committed.
+# Build artifacts left root-owned by a previous Docker build (safe to delete with sudo)
+*.rootowned

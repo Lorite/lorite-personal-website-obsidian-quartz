@@ -1,0 +1,323 @@
+# yaml-language-server: $schema=./quartz/plugins/quartz-plugins.schema.json
+#
+# Quartz 5 configuration for Lorite's Notes (migrated from Quartz 4 quartz.config.ts + quartz.layout.ts).
+# JS-callback options (custom Explorer filter/sort) and the QUARTZ_BASE_URL env override live in quartz.ts.
+configuration:
+  pageTitle: Lorite's Notes
+  pageTitleSuffix: ""
+  enableSPA: true
+  enablePopovers: true
+  analytics:
+    provider: plausible
+  locale: en-US
+  baseUrl: alejandro.lorite.eu
+  ignorePatterns:
+    - private
+    - templates
+    - .obsidian
+  theme:
+    fontOrigin: googleFonts
+    cdnCaching: true
+    typography:
+      header: Schibsted Grotesk
+      body: Source Sans Pro
+      code: IBM Plex Mono
+    colors:
+      lightMode:
+        # Beach Day: Pastel sky & sand
+        light: "#FFFBF0"
+        lightgray: "#E8F4F8"
+        gray: "#C8D8E4"
+        darkgray: "#5A7A8C"
+        dark: "#2C3E50"
+        # Links: Ocean teal
+        secondary: "#0084A7"
+        # Hover: Boston Dynamics yellow
+        tertiary: "#FBD403"
+        # Code highlight: Soft sand tint
+        highlight: rgba(251, 212, 3, 0.08)
+        # Selection: Warm pastel yellow
+        textHighlight: "#FBD40344"
+      darkMode:
+        # Sunset Beach: Deep ocean + warm glow
+        light: "#1A2332"
+        lightgray: "#2A3A52"
+        gray: "#4A5F7A"
+        darkgray: "#E8E0D0"
+        dark: "#FBF6ED"
+        # Links: Bright cyan/aqua
+        secondary: "#50D4FF"
+        # Hover: Golden sunset
+        tertiary: "#FFB84D"
+        # Code highlight: Sunset glow
+        highlight: rgba(255, 184, 77, 0.15)
+        # Selection: Deep sunset purple
+        textHighlight: "#FF6B9D66"
+plugins:
+  # ---- transformers ----
+  - source: github:quartz-community/note-properties # replaces v4 Plugin.FrontMatter()
+    enabled: true
+    options:
+      includeAll: false
+      includedProperties:
+        - description
+        - tags
+        - aliases
+      excludedProperties: []
+      hidePropertiesView: true # v4 did not render a frontmatter properties table
+      delimiters: ---
+      language: yaml
+    order: 5
+  - source: github:quartz-community/created-modified-date
+    enabled: true
+    options:
+      defaultDateType: modified
+      priority:
+        - frontmatter
+        - git
+        - filesystem
+    order: 10
+  - source: github:quartz-community/syntax-highlighting
+    enabled: true
+    options:
+      theme:
+        light: dracula-soft
+        dark: dracula
+      keepBackground: false
+    order: 20
+  - source: github:quartz-community/obsidian-flavored-markdown
+    enabled: true
+    options:
+      enableInHtmlEmbed: true
+      enableCheckbox: true
+    order: 30
+  - source: github:quartz-community/github-flavored-markdown
+    enabled: true
+    order: 40
+  - source: github:quartz-community/table-of-contents
+    enabled: true
+    order: 50
+    layout:
+      position: right
+      priority: 30
+      display: desktop-only
+  - source: github:quartz-community/crawl-links
+    enabled: true
+    options:
+      markdownLinkResolution: shortest
+    order: 60
+  - source: github:quartz-community/description
+    enabled: true
+    order: 70
+  - source: github:quartz-community/latex
+    enabled: true
+    options:
+      renderEngine: katex
+    order: 80
+  - source: github:quartz-community/citations
+    enabled: false
+    order: 85
+  - source: github:quartz-community/hard-line-breaks
+    enabled: false
+    order: 90
+  - source: github:quartz-community/ox-hugo
+    enabled: false
+    order: 91
+  - source: github:quartz-community/roam
+    enabled: false
+    order: 92
+  - source: github:quartz-community/fonts
+    enabled: true
+  # ---- filters ----
+  - source: github:quartz-community/remove-draft
+    enabled: true
+  - source: github:quartz-community/explicit-publish # v4 Plugin.ExplicitPublish() — only publish notes with publish: true
+    enabled: true
+  # ---- emitters / page types ----
+  - source: github:quartz-community/alias-redirects
+    enabled: true
+  - source: github:quartz-community/content-index
+    enabled: true
+    options:
+      enableSiteMap: true
+      enableRSS: true
+  - source: github:quartz-community/favicon
+    enabled: true
+  - source: github:quartz-community/og-image # v4 Plugin.CustomOgImages()
+    enabled: true
+  - source: github:quartz-community/cname
+    enabled: false # GitHub Pages deploy uses a project path (no custom domain); Coolify doesn't need it
+  - source: github:quartz-community/canvas-page
+    enabled: true
+  - source: github:quartz-community/content-page
+    enabled: true
+  - source: github:quartz-community/folder-page
+    enabled: true
+  - source: github:quartz-community/tag-page
+    enabled: true
+  - source: github:quartz-community/bases-page
+    enabled: true
+    options: {}
+    order: 50
+  - source: github:quartz-community/unlisted-pages
+    enabled: true
+    options: {}
+    order: 45
+  - source: github:quartz-community/encrypted-pages
+    enabled: true
+    options:
+      iterations: 600000
+      passwordField: password
+      unlistWhenEncrypted: false
+      outputPath: static/encryptedContentIndex.json
+    order: 900
+    layout:
+      position: body
+      priority: 100
+      display: all
+  # ---- layout components ----
+  - source: github:quartz-community/explorer
+    enabled: true
+    layout:
+      position: left
+      priority: 50
+  - source: github:quartz-community/graph
+    enabled: true
+    options:
+      localGraph:
+        depth: 2
+        showTags: true
+      globalGraph:
+        showTags: true
+    layout:
+      position: right
+      priority: 10
+  - source: github:quartz-community/search
+    enabled: true
+    layout:
+      position: left
+      priority: 20
+      group: toolbar
+      groupOptions:
+        grow: true
+  - source: github:quartz-community/backlinks
+    enabled: true
+    layout:
+      position: right
+      priority: 50
+  - source: github:quartz-community/article-title
+    enabled: true
+    layout:
+      position: beforeBody
+      priority: 10
+  - source: github:quartz-community/content-meta
+    enabled: true
+    layout:
+      position: beforeBody
+      priority: 20
+  - source: github:quartz-community/tag-list # v4 had Component.TagList() in beforeBody
+    enabled: true
+    layout:
+      position: beforeBody
+      priority: 30
+  - source: github:quartz-community/page-title
+    enabled: true
+    layout:
+      position: left
+      priority: 10
+  - source: github:quartz-community/darkmode
+    enabled: true
+    layout:
+      position: left
+      priority: 30
+      group: toolbar
+  - source: github:quartz-community/reader-mode
+    enabled: true
+    layout:
+      position: left
+      priority: 35
+      group: toolbar
+  - source: github:quartz-community/breadcrumbs
+    enabled: true
+    layout:
+      position: beforeBody
+      priority: 5
+      condition: not-index
+  - source: github:quartz-community/comments # v4 Component.Comments({ provider: giscus })
+    enabled: true
+    options:
+      provider: giscus
+      options:
+        repo: Lorite/lorite-personal-website-obsidian-quartz
+        repoId: R_kgDOQpBfoQ
+        category: Announcements
+        categoryId: DIC_kwDOQpBfoc4C0BmP
+        lang: en
+        themeUrl: https://giscus.app/themes
+        lightTheme: light
+        darkTheme: dark_dimmed
+    layout:
+      position: afterBody
+      priority: 10
+  - source: github:quartz-community/footer
+    enabled: true
+    options:
+      # Phase 1: simple community footer. The rich Footer (name/role/organization/icons) is ported in Phase 2.
+      links:
+        Email: mailto:a.lorite.mora@gmail.com
+        Google Scholar: https://scholar.google.es/citations?user=M5fEBD8AAAAJ&hl=en
+        GitHub: https://github.com/Lorite
+        LinkedIn: https://www.linkedin.com/in/alejandro-lorite-mora
+        X: https://x.com/aloritemora
+  - source: github:quartz-community/recent-notes
+    enabled: true
+    options:
+      title: Recent Notes
+      limit: 10
+      linkToMore: false
+      hideFolderPages: true
+      hideTagPages: true
+    # v4 showed a "Recent Notes" panel prominently in the left sidebar. Custom filter (exclude
+    # collection-index notes) is applied in quartz.ts. Sits above the folder explorer (priority 50).
+    layout:
+      position: left
+      priority: 45
+  - source: github:quartz-community/spacer
+    enabled: true
+    options: {}
+    order: 25
+    layout:
+      position: left
+      priority: 25
+      display: mobile-only
+  - source: github:quartz-community/stacked-pages
+    enabled: false
+    layout:
+      position: afterBody
+      priority: 50
+      display: all
+layout:
+  groups:
+    toolbar:
+      priority: 35
+      direction: row
+      gap: 0.5rem
+  byPageType:
+    "404":
+      positions:
+        beforeBody: []
+        left: []
+        right: []
+    content: {}
+    folder:
+      exclude:
+        - reader-mode
+      positions:
+        right: []
+    tag:
+      exclude:
+        - reader-mode
+      positions:
+        right: []
+    canvas: {}
+    bases: {}
