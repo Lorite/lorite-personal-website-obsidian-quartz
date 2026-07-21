@@ -127,6 +127,12 @@
       "commit": "a2dfd1373abe58ace461ebea0b4e94cb287f894e",
       "installedAt": "2026-07-15T09:25:43.275Z"
     },
+    "external-url": {
+      "source": "./local-plugins/external-url",
+      "resolved": "/home/lori/git/lorite-personal-website-obsidian-quartz/local-plugins/external-url",
+      "commit": "local",
+      "installedAt": "2026-07-21T20:45:46.183Z"
+    },
     "favicon": {
       "source": "github:quartz-community/favicon",
       "resolved": "https://github.com/quartz-community/favicon.git",

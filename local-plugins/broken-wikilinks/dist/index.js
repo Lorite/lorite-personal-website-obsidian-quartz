@@ -1,12 +1,27 @@
 // local-plugins/broken-wikilinks/src/index.ts
-function hasBrokenClass(node) {
+var DEFAULT_KEEP_SLUG_PREFIXES = ["static/"];
+var DEFAULT_KEEP_CLASSES = ["tag-link"];
+function classList(node) {
   const className = node.properties?.className;
-  if (Array.isArray(className)) return className.includes("broken");
-  if (typeof className === "string") return className.split(/\s+/).includes("broken");
-  return false;
+  if (Array.isArray(className)) return className.map(String);
+  if (typeof className === "string") return className.split(/\s+/);
+  return [];
+}
+function hasBrokenClass(node) {
+  return classList(node).includes("broken");
 }
 var BrokenWikilinks = (opts) => {
   const action = opts?.onBrokenWikilink ?? "remove";
+  const keepSlugPrefixes = opts?.keepSlugPrefixes ?? DEFAULT_KEEP_SLUG_PREFIXES;
+  const keepClasses = opts?.keepClasses ?? DEFAULT_KEEP_CLASSES;
+  const shouldUnwrap = (node) => {
+    if (!hasBrokenClass(node)) return false;
+    const classes = classList(node);
+    if (keepClasses.some((c) => classes.includes(c))) return false;
+    const slug = node.properties?.["data-slug"];
+    if (typeof slug === "string" && keepSlugPrefixes.some((p) => slug.startsWith(p))) return false;
+    return true;
+  };
   return {
     name: "BrokenWikilinks",
     htmlPlugins() {
@@ -18,8 +33,13 @@ var BrokenWikilinks = (opts) => {
             const next = [];
             for (const child of node.children) {
               if (child.type === "element" && child.tagName === "a" && hasBrokenClass(child)) {
-                next.push(...child.children ?? []);
-                continue;
+                if (shouldUnwrap(child)) {
+                  next.push(...child.children ?? []);
+                  continue;
+                }
+                if (child.properties) {
+                  child.properties.className = classList(child).filter((c) => c !== "broken");
+                }
               }
               walk(child);
               next.push(child);

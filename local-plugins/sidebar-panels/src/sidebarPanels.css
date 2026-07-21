@@ -75,34 +75,29 @@
 
 /* --- Recent Notes normalisation ---
    Each entry's title is a bare <h3>, so it inherits the site's full heading size and towers over the
-   Explorer's and Tag Explorer's ~0.95rem links. Match the Explorer's file rows exactly: same size and
-   line-height, no extra row margins, and one line per entry with an ellipsis instead of wrapping —
-   long note titles were wrapping to two lines (45px rows vs the Explorer's 26px), which is what made
-   the section look like it belonged to a different list. */
+   Explorer's and Tag Explorer's links. Strip the heading treatment so an entry is styled exactly like
+   an Explorer file row: same font size, weight, line-height and no row margins.
+
+   Long titles wrap, exactly as they do in the Explorer — it sets no white-space/text-overflow rules
+   at all, so its rows wrap too. (An earlier attempt truncated these with an ellipsis, which made them
+   *differ* from the Explorer rather than match it.) */
 .left.sidebar .sidebar-panels .recent-notes .recent-li .desc h3 {
   margin: 0;
   font-size: 0.95rem;
-  line-height: 1.6;
-  font-weight: 400;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  /* 1.5rem == the Explorer's exact 24px, independent of this element's font-size (a unitless
+     multiplier would resolve against 15.2px and land at 24.32px instead). */
+  line-height: 1.5rem;
+  font-weight: inherit;
 }
 
-/* Quartz sets `white-space: normal` and `overflow-wrap: break-word` directly on links, which beats
-   the nowrap inherited from the <h3> — so titles kept wrapping. Pin it on the anchor as well. */
+/* Quartz gives links their own line-height (22.4px), which left the rows fractionally tighter than
+   the Explorer's 24px. Inherit the heading's instead so wrapped rows line up between the sections. */
 .left.sidebar .sidebar-panels .recent-notes .recent-li .desc h3 a {
-  white-space: nowrap;
-  overflow-wrap: normal;
+  line-height: inherit;
 }
 
 .left.sidebar .sidebar-panels .recent-notes .recent-li {
   margin: 0;
-}
-
-.left.sidebar .sidebar-panels .recent-notes .recent-li .section,
-.left.sidebar .sidebar-panels .recent-notes .recent-li .desc {
-  min-width: 0;
 }
 
 .left.sidebar .sidebar-panels .recent-notes .recent-ul {

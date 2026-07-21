@@ -1,0 +1,54 @@
+{
+  "name": "@lorite/quartz-external-url",
+  "version": "1.0.0",
+  "description": "Shows a link to a note's source when its frontmatter carries a url (v4 ContentMeta behaviour)",
+  "type": "module",
+  "license": "MIT",
+  "private": true,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./components": {
+      "types": "./dist/components/index.d.ts",
+      "import": "./dist/components/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "sideEffects": false,
+  "peerDependencies": {
+    "preact": "^10.0.0"
+  },
+  "quartz": {
+    "name": "external-url",
+    "displayName": "External URL",
+    "category": "component",
+    "version": "1.0.0",
+    "quartzVersion": ">=5.0.0",
+    "dependencies": [],
+    "defaultOrder": 50,
+    "defaultEnabled": true,
+    "defaultOptions": {
+      "field": "url",
+      "label": "External URL"
+    },
+    "components": {
+      "ExternalUrl": {
+        "displayName": "External URL",
+        "defaultPosition": "beforeBody",
+        "defaultPriority": 21
+      }
+    },
+    "optionSchema": {
+      "field": {
+        "type": "string"
+      },
+      "label": {
+        "type": "string"
+      }
+    }
+  }
+}

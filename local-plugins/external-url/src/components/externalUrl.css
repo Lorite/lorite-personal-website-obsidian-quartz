@@ -1,0 +1,6 @@
+/* Sits directly under the content-meta line, styled to read as part of it. */
+.external-url {
+  margin: 0 0 1rem 0;
+  font-size: 0.9rem;
+  opacity: 0.75;
+}

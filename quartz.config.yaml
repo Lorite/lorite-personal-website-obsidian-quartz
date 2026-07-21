@@ -260,6 +260,16 @@ plugins:
     layout:
       position: beforeBody
       priority: 20
+  # Local plugin: shows a note's source link when its frontmatter has a `url` (v4 had this as an
+  # "External URL" segment in its forked ContentMeta; the v5 community plugin has no equivalent).
+  - source: ./local-plugins/external-url
+    enabled: true
+    options:
+      field: url
+      label: External URL
+    layout:
+      position: beforeBody
+      priority: 21
   - source: github:quartz-community/tag-list # v4 had Component.TagList() in beforeBody
     enabled: true
     layout:
