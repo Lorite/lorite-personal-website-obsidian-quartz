@@ -259,6 +259,12 @@
       "commit": "6984305e5dae0830c025450e160f12610406f7a4",
       "installedAt": "2026-07-15T09:25:40.809Z"
     },
+    "tag-explorer": {
+      "source": "./local-plugins/tag-explorer",
+      "resolved": "/home/lori/git/lorite-personal-website-obsidian-quartz/local-plugins/tag-explorer",
+      "commit": "local",
+      "installedAt": "2026-07-21T17:23:20.249Z"
+    },
     "tag-list": {
       "source": "github:quartz-community/tag-list",
       "resolved": "https://github.com/quartz-community/tag-list.git",

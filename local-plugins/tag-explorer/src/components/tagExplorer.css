@@ -1,0 +1,66 @@
+/* Styled to sit alongside the community Explorer in the sidebar. */
+.tag-explorer {
+  overflow-y: auto;
+  max-height: 30rem;
+}
+
+.tag-explorer h3 {
+  font-size: 1rem;
+  margin: 0 0 0.5rem 0;
+  opacity: 0.85;
+}
+
+.tag-explorer ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.tag-explorer .tag-explorer-list ul {
+  /* indent each nested level, with a guide line like the file explorer */
+  margin-left: 0.6rem;
+  padding-left: 0.6rem;
+  border-left: 1px solid var(--lightgray);
+}
+
+.tag-explorer li {
+  margin: 0.15rem 0;
+}
+
+.tag-explorer a.internal.tag-link {
+  background-color: transparent;
+  padding: 0;
+  border-radius: 0;
+  font-size: 0.95rem;
+}
+
+.tag-explorer .tag-count {
+  margin-left: 0.35rem;
+  font-size: 0.75rem;
+  opacity: 0.55;
+}
+
+.tag-explorer summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+/* Replace the default disclosure triangle with a rotating chevron. */
+.tag-explorer summary::-webkit-details-marker {
+  display: none;
+}
+
+.tag-explorer summary::before {
+  content: "›";
+  display: inline-block;
+  transition: transform 0.15s ease;
+  opacity: 0.6;
+  font-size: 0.9rem;
+}
+
+.tag-explorer details[open] > summary::before {
+  transform: rotate(90deg);
+}

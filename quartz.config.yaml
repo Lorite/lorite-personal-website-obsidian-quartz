@@ -186,6 +186,21 @@ plugins:
     layout:
       position: left
       priority: 50
+  # Local plugin: v5-native replacement for the v4 TagExplorer. Builds the tag hierarchy from the
+  # content index and collapses with native <details>, so it needs no client-side script.
+  - source: ./local-plugins/tag-explorer
+    enabled: true
+    options:
+      title: Tag Explorer
+      defaultState: collapsed
+      showCount: true
+      sortBy: name
+      exclude:
+        - collection-index
+    layout:
+      position: left
+      priority: 55
+      display: desktop-only
   - source: github:quartz-community/graph
     enabled: true
     options:

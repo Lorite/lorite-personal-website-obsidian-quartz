@@ -1,0 +1,66 @@
+{
+  "name": "@lorite/quartz-tag-explorer",
+  "version": "1.0.0",
+  "description": "Sidebar explorer for the tag hierarchy, built from the content index",
+  "type": "module",
+  "license": "MIT",
+  "private": true,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./components": {
+      "types": "./dist/components/index.d.ts",
+      "import": "./dist/components/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "sideEffects": false,
+  "peerDependencies": {
+    "preact": "^10.0.0"
+  },
+  "quartz": {
+    "name": "tag-explorer",
+    "displayName": "Tag Explorer",
+    "category": "component",
+    "version": "1.0.0",
+    "quartzVersion": ">=5.0.0",
+    "dependencies": [],
+    "defaultOrder": 50,
+    "defaultEnabled": true,
+    "defaultOptions": {
+      "title": "Tag Explorer",
+      "defaultState": "collapsed",
+      "showCount": true,
+      "sortBy": "name",
+      "exclude": []
+    },
+    "components": {
+      "TagExplorer": {
+        "displayName": "Tag Explorer",
+        "defaultPosition": "left",
+        "defaultPriority": 55
+      }
+    },
+    "optionSchema": {
+      "title": {
+        "type": "string"
+      },
+      "defaultState": {
+        "type": "string"
+      },
+      "showCount": {
+        "type": "boolean"
+      },
+      "sortBy": {
+        "type": "string"
+      },
+      "exclude": {
+        "type": "array"
+      }
+    }
+  }
+}
