@@ -144,6 +144,9 @@ plugins:
     enabled: true
     options:
       author: Alejandro Lorite Mora
+  # Local plugin: one collapsible sidebar panel for Recent Notes + Explorer + Tag Explorer.
+  - source: ./local-plugins/sidebar-panels
+    enabled: true
   # Local plugin: makes the generated collection-index tables (movies, research, ...) sortable
   # and filterable client-side.
   - source: ./local-plugins/collection-table
@@ -206,6 +209,7 @@ plugins:
     layout:
       position: left
       priority: 50
+      group: sidebar-panels
   # Local plugin: v5-native replacement for the v4 TagExplorer. Builds the tag hierarchy from the
   # content index and collapses with native <details>, so it needs no client-side script.
   - source: ./local-plugins/tag-explorer
@@ -221,6 +225,7 @@ plugins:
       position: left
       priority: 55
       display: desktop-only
+      group: sidebar-panels
   - source: github:quartz-community/graph
     enabled: true
     options:
@@ -367,6 +372,7 @@ plugins:
     layout:
       position: left
       priority: 45
+      group: sidebar-panels
   - source: github:quartz-community/spacer
     enabled: true
     options: {}
@@ -387,6 +393,12 @@ layout:
       priority: 35
       direction: row
       gap: 0.5rem
+    # Recent Notes + Explorer + Tag Explorer stacked inside one bordered panel; the
+    # sidebar-panels plugin adds the collapsible section headers and the shared scroll area.
+    sidebar-panels:
+      priority: 45
+      direction: column
+      gap: 0.25rem
     # Breadcrumbs (grow) + TopMenu side by side, reproducing the v4 layout's Flex row.
     topbar:
       priority: 5

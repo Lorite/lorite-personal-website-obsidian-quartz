@@ -1,0 +1,30 @@
+{
+  "name": "@lorite/quartz-sidebar-panels",
+  "version": "1.0.0",
+  "description": "Presents the left sidebar's Recent Notes, Explorer and Tag Explorer as one panel with collapsible sections",
+  "type": "module",
+  "license": "MIT",
+  "private": true,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "sideEffects": false,
+  "quartz": {
+    "name": "sidebar-panels",
+    "displayName": "Sidebar Panels",
+    "category": "transformer",
+    "version": "1.0.0",
+    "quartzVersion": ">=5.0.0",
+    "dependencies": [],
+    "defaultOrder": 8,
+    "defaultEnabled": true,
+    "defaultOptions": {},
+    "optionSchema": {}
+  }
+}

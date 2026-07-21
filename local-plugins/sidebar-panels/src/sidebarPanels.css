@@ -1,0 +1,80 @@
+/*
+ * One bordered panel containing Recent Notes, Explorer and Tag Explorer as collapsible sections.
+ *
+ * This replaces the previous approach of capping each panel's height separately. Three independent
+ * panels competed for space in the sidebar's flex column, which is what shrank the Tag Explorer to a
+ * rendered height of 0. A single scroll container removes that competition structurally.
+ */
+.left.sidebar .sidebar-panels {
+  border: 1px solid var(--lightgray);
+  border-radius: 5px;
+  padding: 0.25rem 0.6rem;
+  /* one scroll area for all three sections */
+  max-height: min(32rem, calc(100vh - 12rem));
+  overflow-y: auto;
+  min-height: 0;
+  flex: 0 1 auto;
+}
+
+/* Quartz wraps each group member in a positioning div; keep those transparent to the layout. */
+.left.sidebar .sidebar-panels > div {
+  min-width: 0;
+}
+
+/* Divider between sections. */
+.left.sidebar .sidebar-panels > div + div {
+  border-top: 1px solid var(--lightgray);
+  margin-top: 0.4rem;
+  padding-top: 0.4rem;
+}
+
+/* The sections now scroll together, so drop the individual caps. */
+.left.sidebar .sidebar-panels .recent-notes,
+.left.sidebar .sidebar-panels .tag-explorer,
+.left.sidebar .sidebar-panels .explorer {
+  max-height: none;
+  overflow: visible;
+}
+
+/* --- collapsible headers (Recent Notes / Tag Explorer) ---
+   Styled to match the Explorer's own .title-button so the three read as one control set. */
+.left.sidebar .sidebar-panels .panel-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+  width: 100%;
+  padding: 0;
+  margin: 0.35rem 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  font-family: inherit;
+  text-align: left;
+}
+
+.left.sidebar .sidebar-panels .panel-toggle h3 {
+  margin: 0;
+  font-size: 1rem;
+  opacity: 0.85;
+}
+
+.left.sidebar .sidebar-panels .panel-toggle:hover h3 {
+  color: var(--secondary);
+}
+
+.left.sidebar .sidebar-panels .panel-chevron {
+  flex: 0 0 auto;
+  opacity: 0.6;
+  transition: transform 0.15s ease;
+}
+
+/* Chevron points down when open, right when collapsed. */
+.left.sidebar .sidebar-panels .panel-collapsed .panel-chevron {
+  transform: rotate(-90deg);
+}
+
+.left.sidebar .sidebar-panels .panel-collapsed .panel-content {
+  display: none;
+}
