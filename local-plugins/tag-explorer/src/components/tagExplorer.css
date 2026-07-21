@@ -1,11 +1,11 @@
 /* Styled to sit alongside the community Explorer in the sidebar. */
 .tag-explorer {
+  /* Standalone defaults; inside the sidebar panel these are overridden because the panel itself is
+     the scroll container. No min-height here — it used to guard against the panel being flex-squashed
+     to zero, but the sidebar-panels group fixed that structurally, and a min-height reserves empty
+     space below the section when it's collapsed. */
   overflow-y: auto;
   max-height: 30rem;
-  /* The sidebar is a flex column: without this the panel gets shrunk to a rendered height of 0
-     when the panels above it (e.g. Recent Notes) claim all the space. */
-  flex: 0 1 auto;
-  min-height: 6rem;
 }
 
 .tag-explorer h3 {

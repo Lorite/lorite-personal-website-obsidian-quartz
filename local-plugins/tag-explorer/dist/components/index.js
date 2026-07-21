@@ -2,7 +2,77 @@
 import { classNames, resolveRelative } from "@quartz-community/utils";
 
 // local-plugins/tag-explorer/src/components/tagExplorer.css
-var tagExplorer_default = '/* Styled to sit alongside the community Explorer in the sidebar. */\n.tag-explorer {\n  overflow-y: auto;\n  max-height: 30rem;\n  /* The sidebar is a flex column: without this the panel gets shrunk to a rendered height of 0\n     when the panels above it (e.g. Recent Notes) claim all the space. */\n  flex: 0 1 auto;\n  min-height: 6rem;\n}\n\n.tag-explorer h3 {\n  font-size: 1rem;\n  margin: 0 0 0.5rem 0;\n  opacity: 0.85;\n}\n\n.tag-explorer ul {\n  list-style: none;\n  margin: 0;\n  padding: 0;\n}\n\n.tag-explorer .tag-explorer-list ul {\n  /* indent each nested level, with a guide line like the file explorer */\n  margin-left: 0.6rem;\n  padding-left: 0.6rem;\n  border-left: 1px solid var(--lightgray);\n}\n\n.tag-explorer li {\n  margin: 0.15rem 0;\n}\n\n.tag-explorer a.internal.tag-link {\n  background-color: transparent;\n  padding: 0;\n  border-radius: 0;\n  font-size: 0.95rem;\n}\n\n.tag-explorer .tag-count {\n  margin-left: 0.35rem;\n  font-size: 0.75rem;\n  opacity: 0.55;\n}\n\n.tag-explorer summary {\n  cursor: pointer;\n  list-style: none;\n  display: flex;\n  align-items: center;\n  gap: 0.2rem;\n}\n\n/* Replace the default disclosure triangle with a rotating chevron. */\n.tag-explorer summary::-webkit-details-marker {\n  display: none;\n}\n\n.tag-explorer summary::before {\n  content: "\u203A";\n  display: inline-block;\n  transition: transform 0.15s ease;\n  opacity: 0.6;\n  font-size: 0.9rem;\n}\n\n.tag-explorer details[open] > summary::before {\n  transform: rotate(90deg);\n}\n';
+var tagExplorer_default = `/* Styled to sit alongside the community Explorer in the sidebar. */
+.tag-explorer {
+  /* Standalone defaults; inside the sidebar panel these are overridden because the panel itself is
+     the scroll container. No min-height here \u2014 it used to guard against the panel being flex-squashed
+     to zero, but the sidebar-panels group fixed that structurally, and a min-height reserves empty
+     space below the section when it's collapsed. */
+  overflow-y: auto;
+  max-height: 30rem;
+}
+
+.tag-explorer h3 {
+  font-size: 1rem;
+  margin: 0 0 0.5rem 0;
+  opacity: 0.85;
+}
+
+.tag-explorer ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.tag-explorer .tag-explorer-list ul {
+  /* indent each nested level, with a guide line like the file explorer */
+  margin-left: 0.6rem;
+  padding-left: 0.6rem;
+  border-left: 1px solid var(--lightgray);
+}
+
+.tag-explorer li {
+  margin: 0.15rem 0;
+}
+
+.tag-explorer a.internal.tag-link {
+  background-color: transparent;
+  padding: 0;
+  border-radius: 0;
+  font-size: 0.95rem;
+}
+
+.tag-explorer .tag-count {
+  margin-left: 0.35rem;
+  font-size: 0.75rem;
+  opacity: 0.55;
+}
+
+.tag-explorer summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+/* Replace the default disclosure triangle with a rotating chevron. */
+.tag-explorer summary::-webkit-details-marker {
+  display: none;
+}
+
+.tag-explorer summary::before {
+  content: "\u203A";
+  display: inline-block;
+  transition: transform 0.15s ease;
+  opacity: 0.6;
+  font-size: 0.9rem;
+}
+
+.tag-explorer details[open] > summary::before {
+  transform: rotate(90deg);
+}
+`;
 
 // local-plugins/tag-explorer/src/components/TagExplorer.tsx
 import { Fragment, jsx, jsxs } from "preact/jsx-runtime";
