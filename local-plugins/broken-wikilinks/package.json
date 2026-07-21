@@ -1,0 +1,36 @@
+{
+  "name": "@lorite/quartz-broken-wikilinks",
+  "version": "1.0.0",
+  "description": "Unwraps wikilinks pointing at non-existent notes (the v4 onBrokenWikilink: remove behaviour)",
+  "type": "module",
+  "license": "MIT",
+  "private": true,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "sideEffects": false,
+  "quartz": {
+    "name": "broken-wikilinks",
+    "displayName": "Broken Wikilinks",
+    "category": "transformer",
+    "version": "1.0.0",
+    "quartzVersion": ">=5.0.0",
+    "dependencies": [],
+    "defaultOrder": 65,
+    "defaultEnabled": true,
+    "defaultOptions": {
+      "onBrokenWikilink": "remove"
+    },
+    "optionSchema": {
+      "onBrokenWikilink": {
+        "type": "string"
+      }
+    }
+  }
+}

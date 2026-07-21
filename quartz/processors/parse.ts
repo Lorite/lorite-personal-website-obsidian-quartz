@@ -11,7 +11,8 @@ import { FilePath, QUARTZ, slugifyFilePath } from "../util/path"
 import path from "path"
 import workerpool, { Promise as WorkerPromise } from "workerpool"
 import { QuartzLogger } from "../util/log"
-import { trace } from "../util/trace"
+// NOTE: `trace` is intentionally no longer imported — see the LOCAL PATCH comments below, which
+// replace its fatal behaviour with a per-file warning so one bad note can't fail the whole build.
 import { BuildCtx, WorkerSerializableBuildCtx } from "../util/ctx"
 import { styleText } from "util"
 
@@ -112,7 +113,14 @@ export function createFileParser(ctx: BuildCtx, fps: FilePath[]) {
           console.log(`[markdown] ${fp} -> ${file.data.slug} (${perf.timeSince()})`)
         }
       } catch (err) {
-        trace(`\nFailed to process markdown \`${fp}\``, err as Error)
+        // LOCAL PATCH (ported from the v4 fork, commit 3465d75): skip this file instead of
+        // aborting the whole build. `trace()` either throws (worker thread) or process.exit(1)s,
+        // so a single malformed note takes the entire site down — and because this site's
+        // container syncs + builds on every start, a failed build means no site at all rather
+        // than one missing page. Warn and carry on instead.
+        console.warn(
+          `\nWarning: skipping \`${fp}\` — failed to process markdown: ${(err as Error).message}`,
+        )
       }
     }
 
@@ -134,7 +142,13 @@ export function createMarkdownParser(ctx: BuildCtx, mdContent: MarkdownContent[]
           console.log(`[html] ${file.data.slug} (${perf.timeSince()})`)
         }
       } catch (err) {
-        trace(`\nFailed to process html \`${file.data.filePath}\``, err as Error)
+        // LOCAL PATCH (see the markdown parser above). This is the stage that historically broke
+        // the site: two or more HTML comments in one note trigger a parse5 `_stateComment`
+        // null-deref via rehype-raw. publish-sync strips HTML comments defensively, but any other
+        // malformed note would otherwise abort the build and leave the site unpublished.
+        console.warn(
+          `\nWarning: skipping \`${file.data.filePath}\` — failed to process html: ${(err as Error).message}`,
+        )
       }
     }
 

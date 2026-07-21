@@ -31,6 +31,12 @@
       "commit": "cf2e161425165e1ac713f1feb7250b07fe0250ae",
       "installedAt": "2026-07-15T09:25:45.217Z"
     },
+    "broken-wikilinks": {
+      "source": "./local-plugins/broken-wikilinks",
+      "resolved": "/home/lori/git/lorite-personal-website-obsidian-quartz/local-plugins/broken-wikilinks",
+      "commit": "local",
+      "installedAt": "2026-07-21T18:11:42.523Z"
+    },
     "canvas-page": {
       "source": "github:quartz-community/canvas-page",
       "resolved": "https://github.com/quartz-community/canvas-page.git",

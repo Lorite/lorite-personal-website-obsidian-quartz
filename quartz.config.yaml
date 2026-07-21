@@ -105,7 +105,17 @@ plugins:
     enabled: true
     options:
       markdownLinkResolution: shortest
+      # Marks wikilinks that point at non-existent notes with a `broken` class. On its own that
+      # leaves them clickable (and 404-ing); ./local-plugins/broken-wikilinks then unwraps them.
+      disableBrokenWikilinks: true
     order: 60
+  # Local plugin: restores the v4 `onBrokenWikilink: "remove"` behaviour — unwrap dead wikilinks so
+  # the text survives but the clickable, crawlable 404 link doesn't. Must run after crawl-links.
+  - source: ./local-plugins/broken-wikilinks
+    enabled: true
+    options:
+      onBrokenWikilink: remove
+    order: 65
   - source: github:quartz-community/description
     enabled: true
     order: 70
@@ -132,6 +142,8 @@ plugins:
   # left-sidebar panel sizing, mobile scroll-padding, ::selection colour.
   - source: ./local-plugins/site-styles
     enabled: true
+    options:
+      author: Alejandro Lorite Mora
   # Local plugin: makes the generated collection-index tables (movies, research, ...) sortable
   # and filterable client-side.
   - source: ./local-plugins/collection-table

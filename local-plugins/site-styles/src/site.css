@@ -23,6 +23,12 @@
   flex: 0 1 auto;
 }
 
+/* The community Recent Notes has no option to hide the per-entry date, and it costs a line of
+   height each. The sidebar list is about "what changed recently", not exact dates. */
+.left.sidebar .recent-notes .meta {
+  display: none;
+}
+
 .left.sidebar .explorer {
   flex: 0 1 auto;
 }
