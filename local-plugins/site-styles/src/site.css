@@ -37,6 +37,19 @@
  * Ported from the v4 base.scss customizations.
  * ------------------------------------------------------------------------- */
 
+/* Responsive site title: scale with the viewport and ellipsize rather than wrapping or
+   overflowing on narrow screens (v4 commit 42dadba). */
+.page-title {
+  font-size: clamp(1rem, 5vw, 1.75rem);
+}
+
+.page-title a {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* Anchor links shouldn't land under the mobile header. */
 @media all and (max-width: 800px) {
   html {
