@@ -16,9 +16,13 @@
   flex: 0 1 auto;
 }
 
-/* Quartz wraps each group member in a positioning div; keep those transparent to the layout. */
+/* Quartz wraps each group member in a positioning div with an inline `align-self: center`. In a
+   column group that centres each section on its own width, so a narrower section (Tag Explorer)
+   ends up indented relative to the others. Stretch them so every header shares one left edge. */
 .left.sidebar .sidebar-panels > div {
   min-width: 0;
+  align-self: stretch;
+  width: 100%;
 }
 
 /* Divider between sections. */
@@ -34,6 +38,30 @@
 .left.sidebar .sidebar-panels .explorer {
   max-height: none;
   overflow: visible;
+}
+
+/* --- Explorer normalisation ---
+   The Explorer is written to fill the sidebar itself: its .explorer-content is `max-height: 100%`
+   with `overflow: hidden` (and absolutely positioned as a full-screen drawer on mobile). Inside this
+   panel that clipped the whole tree to ~59px. Let it size to its content and scroll with the panel.
+   Its own toggle buttons are hidden because the script replaces them with the shared header, so all
+   three sections look and behave the same. */
+.left.sidebar .sidebar-panels .explorer > .explorer-toggle {
+  display: none;
+}
+
+.left.sidebar .sidebar-panels .explorer .explorer-content {
+  position: static;
+  transform: none;
+  visibility: visible;
+  width: auto;
+  max-width: none;
+  height: auto;
+  max-height: none;
+  overflow: visible;
+  padding: 0;
+  margin: 0;
+  background: none;
 }
 
 /* --- collapsible headers (Recent Notes / Tag Explorer) ---
