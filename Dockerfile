@@ -24,13 +24,17 @@ COPY . .
 # (only --latest would change that).
 RUN npx quartz plugin install --from-config
 
-# Static file server for the built site (Coolify healthchecks port 3000).
-RUN npm install --global http-server
+# The site is served by scripts/serve.mjs (serve-handler, already a Quartz dependency) rather than
+# http-server. http-server 404s every tag that has sub-tags: Quartz writes the page as a flat file
+# (tags/engineering.html) while also creating a same-named directory for the children, and
+# http-server resolves the directory first, 302s to /tags/engineering/ and finds no index.html.
+# serve-handler is what Quartz's own dev server uses, so production now matches `quartz build --serve`.
 
 # The private Obsidian notes repo is mounted here at runtime; publish-sync builds `content/` from it.
 ENV NOTES_SOURCE=/root/lorite-obsidian-notes
+ENV PORT=3000
 
 EXPOSE 3000
 
 # At container start: sync publishable notes from the mounted vault into content/, build, then serve.
-CMD ["/bin/sh", "-c", "if [ -d \"$NOTES_SOURCE\" ] && [ \"$(ls -A \"$NOTES_SOURCE\" 2>/dev/null)\" ]; then npm run sync:published -- --source \"$NOTES_SOURCE\" --dest \"content\"; else echo 'Notes source missing or empty at '$NOTES_SOURCE', skipping sync.'; fi && npx quartz build && http-server public -p 3000 -c-1"]
+CMD ["/bin/sh", "-c", "if [ -d \"$NOTES_SOURCE\" ] && [ \"$(ls -A \"$NOTES_SOURCE\" 2>/dev/null)\" ]; then npm run sync:published -- --source \"$NOTES_SOURCE\" --dest \"content\"; else echo 'Notes source missing or empty at '$NOTES_SOURCE', skipping sync.'; fi && npx quartz build && node scripts/serve.mjs public"]
