@@ -1,0 +1,36 @@
+{
+  "name": "@lorite/quartz-icon-fonts",
+  "version": "1.0.0",
+  "description": "Injects an icon-font stylesheet (Font Awesome by default) so components can use icon classes",
+  "type": "module",
+  "license": "MIT",
+  "private": true,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "sideEffects": false,
+  "quartz": {
+    "name": "icon-fonts",
+    "displayName": "Icon Fonts",
+    "category": "transformer",
+    "version": "1.0.0",
+    "quartzVersion": ">=5.0.0",
+    "dependencies": [],
+    "defaultOrder": 5,
+    "defaultEnabled": true,
+    "defaultOptions": {
+      "stylesheet": "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+    },
+    "optionSchema": {
+      "stylesheet": {
+        "type": "string"
+      }
+    }
+  }
+}

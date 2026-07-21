@@ -1,0 +1,63 @@
+{
+  "name": "@lorite/quartz-topmenu",
+  "version": "1.0.0",
+  "description": "Top menu with personal/work tag links (ported from the Quartz v4 TopMenu component)",
+  "type": "module",
+  "license": "MIT",
+  "private": true,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./components": {
+      "types": "./dist/components/index.d.ts",
+      "import": "./dist/components/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "sideEffects": false,
+  "peerDependencies": {
+    "preact": "^10.0.0"
+  },
+  "quartz": {
+    "name": "topmenu",
+    "displayName": "Top Menu",
+    "category": "component",
+    "version": "1.0.0",
+    "quartzVersion": ">=5.0.0",
+    "dependencies": [],
+    "defaultOrder": 50,
+    "defaultEnabled": true,
+    "defaultOptions": {
+      "links": [
+        {
+          "tag": "personal",
+          "href": "/tags/personal"
+        },
+        {
+          "tag": "work",
+          "href": "/tags/work"
+        }
+      ],
+      "separator": "|"
+    },
+    "components": {
+      "TopMenu": {
+        "displayName": "Top Menu",
+        "defaultPosition": "beforeBody",
+        "defaultPriority": 8
+      }
+    },
+    "optionSchema": {
+      "links": {
+        "type": "array"
+      },
+      "separator": {
+        "type": "string"
+      }
+    }
+  }
+}

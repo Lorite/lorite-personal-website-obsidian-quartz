@@ -134,10 +134,10 @@
       "installedAt": "2026-07-15T09:25:40.775Z"
     },
     "footer": {
-      "source": "github:quartz-community/footer",
-      "resolved": "https://github.com/quartz-community/footer.git",
-      "commit": "6ed61928d3c0178d7cef972ebcbca6a206a2f065",
-      "installedAt": "2026-07-15T09:25:44.999Z"
+      "source": "./local-plugins/footer",
+      "resolved": "/home/lori/git/lorite-personal-website-obsidian-quartz/local-plugins/footer",
+      "commit": "local",
+      "installedAt": "2026-07-21T17:08:32.389Z"
     },
     "github-flavored-markdown": {
       "source": "github:quartz-community/github-flavored-markdown",
@@ -156,6 +156,12 @@
       "resolved": "https://github.com/quartz-community/hard-line-breaks.git",
       "commit": "0d448f38a24c568c5539ff2cd57d813293430ccd",
       "installedAt": "2026-07-15T09:25:40.655Z"
+    },
+    "icon-fonts": {
+      "source": "./local-plugins/icon-fonts",
+      "resolved": "/home/lori/git/lorite-personal-website-obsidian-quartz/local-plugins/icon-fonts",
+      "commit": "local",
+      "installedAt": "2026-07-21T17:07:32.845Z"
     },
     "latex": {
       "source": "github:quartz-community/latex",
@@ -223,6 +229,12 @@
       "commit": "0f4c1a233cd03a0f562e13636b89b7708f8e2698",
       "installedAt": "2026-07-15T09:25:44.089Z"
     },
+    "site-footer": {
+      "source": "./local-plugins/site-footer",
+      "resolved": "/home/lori/git/lorite-personal-website-obsidian-quartz/local-plugins/site-footer",
+      "commit": "local",
+      "installedAt": "2026-07-21T17:07:32.845Z"
+    },
     "spacer": {
       "source": "github:quartz-community/spacer",
       "resolved": "https://github.com/quartz-community/spacer.git",
@@ -258,6 +270,12 @@
       "resolved": "https://github.com/quartz-community/tag-page.git",
       "commit": "eabf3eec55c0bab7f49e69957341f34d2ae3c5a1",
       "installedAt": "2026-07-15T09:25:42.585Z"
+    },
+    "topmenu": {
+      "source": "./local-plugins/topmenu",
+      "resolved": "/home/lori/git/lorite-personal-website-obsidian-quartz/local-plugins/topmenu",
+      "commit": "local",
+      "installedAt": "2026-07-21T16:56:50.457Z"
     },
     "unlisted-pages": {
       "source": "github:quartz-community/unlisted-pages",

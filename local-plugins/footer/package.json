@@ -1,0 +1,67 @@
+{
+  "name": "@lorite/quartz-footer",
+  "version": "1.0.0",
+  "description": "Personal footer with name/role/organization and icon links (ported from the Quartz v4 Footer component)",
+  "type": "module",
+  "license": "MIT",
+  "private": true,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./components": {
+      "types": "./dist/components/index.d.ts",
+      "import": "./dist/components/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "sideEffects": false,
+  "peerDependencies": {
+    "preact": "^10.0.0"
+  },
+  "quartz": {
+    "name": "footer",
+    "displayName": "Site Footer",
+    "category": "component",
+    "version": "1.0.0",
+    "quartzVersion": ">=5.0.0",
+    "dependencies": [],
+    "defaultOrder": 50,
+    "defaultEnabled": true,
+    "defaultOptions": {
+      "iconStylesheet": "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css",
+      "createdWith": "Created with",
+      "links": []
+    },
+    "components": {
+      "Footer": {
+        "displayName": "Footer",
+        "defaultPosition": "footer",
+        "defaultPriority": 50
+      }
+    },
+    "optionSchema": {
+      "name": {
+        "type": "string"
+      },
+      "role": {
+        "type": "string"
+      },
+      "organization": {
+        "type": "object"
+      },
+      "links": {
+        "type": "array"
+      },
+      "createdWith": {
+        "type": "string"
+      },
+      "iconStylesheet": {
+        "type": "string"
+      }
+    }
+  }
+}
