@@ -16,7 +16,13 @@ COPY . .
 # Quartz v5 requires community plugins to be installed before building. `npx quartz build` does NOT
 # run the `prebuild` npm hook, so install them explicitly here (needs network at image-build time;
 # writes to .quartz/plugins, which is .gitignored and therefore not present in the build context).
-RUN npx quartz plugin install
+#
+# --from-config is REQUIRED here: without it the installer reads quartz.lock.json, which records local
+# plugins by absolute host path (e.g. /home/<user>/.../local-plugins/topmenu). That path doesn't exist
+# in the image, so every ./local-plugins/* plugin fails to link. Resolving from quartz.config.yaml uses
+# the relative paths instead. Versions of git-hosted plugins stay pinned to the lockfile commits
+# (only --latest would change that).
+RUN npx quartz plugin install --from-config
 
 # Static file server for the built site (Coolify healthchecks port 3000).
 RUN npm install --global http-server

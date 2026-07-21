@@ -39,8 +39,10 @@ jobs:
           key: ${{ runner.os }}-plugins-${{ hashFiles('quartz.lock.json') }}
           restore-keys: |
             ${{ runner.os }}-plugins-
+      # --from-config is required: quartz.lock.json records local ./local-plugins/* plugins by
+      # absolute path from the machine that installed them, which doesn't exist on the runner.
       - name: Install Quartz plugins
-        run: npx quartz plugin install
+        run: npx quartz plugin install --from-config
       - name: Checkout private notes repository
         uses: actions/checkout@v4
         with:
