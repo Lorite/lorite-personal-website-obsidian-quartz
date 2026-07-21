@@ -6,16 +6,25 @@
  * quartz.config.yaml), which renders them inside one `.flex-component` container. That container
  * gets a `sidebar-panels` class here so the CSS can style it as a single bordered panel.
  *
- * All three sections get the same header treatment. The Explorer ships its own toggle
+ * Behaviour: an accordion — at most one section is expanded at a time, and the other two always
+ * remain visible as their collapsed headers. Clicking the open section closes it, leaving all three
+ * collapsed (which is also the default on a first visit). The choice is remembered in localStorage.
+ *
+ * All three sections get the same generated header. The Explorer ships its own toggle
  * (`button.explorer-toggle` around an <h2>), but inside this panel it doesn't work — its handler
  * never updates `aria-expanded` — and its <h2> looks nothing like the other sections' <h3>. So its
- * native toggles are hidden (via CSS) and it gets the same generated header as the others, using
- * its existing `.explorer-content` as the collapsible body.
- *
- * Open/closed state is remembered in localStorage. Sections default to collapsed.
+ * native toggles are hidden (via CSS) and it gets the shared header, using its existing
+ * `.explorer-content` as the collapsible body.
  */
 
-const STORAGE_PREFIX = "sidebar-panel:"
+/** Key of the single expanded section, or "" when all are collapsed. */
+const STORAGE_KEY = "sidebar-panels:open"
+
+interface Section {
+  key: string
+  panel: HTMLElement
+  button: HTMLButtonElement
+}
 
 function chevron(): SVGSVGElement {
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg")
@@ -34,39 +43,39 @@ function chevron(): SVGSVGElement {
   return svg
 }
 
-function readState(key: string, fallback: boolean): boolean {
+function readOpenKey(): string {
   try {
-    const stored = localStorage.getItem(STORAGE_PREFIX + key)
-    if (stored === "open") return true
-    if (stored === "closed") return false
+    return localStorage.getItem(STORAGE_KEY) ?? ""
   } catch {
-    // localStorage can throw in private mode; fall back to the default.
+    // localStorage can throw in private mode; default to all collapsed.
+    return ""
   }
-  return fallback
 }
 
-function writeState(key: string, open: boolean) {
+function writeOpenKey(key: string) {
   try {
-    localStorage.setItem(STORAGE_PREFIX + key, open ? "open" : "closed")
+    localStorage.setItem(STORAGE_KEY, key)
   } catch {
     // ignore
   }
 }
 
 /**
- * Give a panel a collapsible header.
+ * Give a panel a collapsible header and return it as a section.
  *
  * `existingContent` lets a panel nominate an element that already holds its body (the Explorer's
  * `.explorer-content`); otherwise everything after the panel's heading is moved into a new wrapper.
  */
-function makeCollapsible(
+function buildSection(
   panel: HTMLElement,
   key: string,
   label: string,
-  defaultOpen: boolean,
   existingContent?: HTMLElement | null,
-) {
-  if (panel.dataset.collapsibleReady === "true") return
+): Section | null {
+  if (panel.dataset.collapsibleReady === "true") {
+    const existing = panel.querySelector(":scope > .panel-toggle")
+    return existing instanceof HTMLButtonElement ? { key, panel, button: existing } : null
+  }
   panel.dataset.collapsibleReady = "true"
 
   let content: HTMLElement
@@ -95,18 +104,7 @@ function makeCollapsible(
   button.append(h3, chevron())
   panel.prepend(button)
 
-  const apply = (open: boolean) => {
-    button.setAttribute("aria-expanded", String(open))
-    panel.classList.toggle("panel-collapsed", !open)
-  }
-
-  apply(readState(key, defaultOpen))
-
-  button.addEventListener("click", () => {
-    const open = button.getAttribute("aria-expanded") !== "true"
-    apply(open)
-    writeState(key, open)
-  })
+  return { key, panel, button }
 }
 
 function setup() {
@@ -123,23 +121,56 @@ function setup() {
   if (!(group instanceof HTMLElement)) return
   group.classList.add("sidebar-panels")
 
+  const sections: Section[] = []
+
   const recent = group.querySelector(".recent-notes")
-  if (recent instanceof HTMLElement) makeCollapsible(recent, "recent-notes", "Recent Notes", false)
+  if (recent instanceof HTMLElement) {
+    const section = buildSection(recent, "recent-notes", "Recent Notes")
+    if (section) sections.push(section)
+  }
 
   const explorer = group.querySelector(".explorer")
   if (explorer instanceof HTMLElement) {
     const content = explorer.querySelector(".explorer-content")
-    makeCollapsible(
+    const section = buildSection(
       explorer,
       "explorer",
       "Explorer",
-      false,
       content instanceof HTMLElement ? content : null,
     )
+    if (section) sections.push(section)
   }
 
   const tags = group.querySelector(".tag-explorer")
-  if (tags instanceof HTMLElement) makeCollapsible(tags, "tag-explorer", "Tag Explorer", false)
+  if (tags instanceof HTMLElement) {
+    const section = buildSection(tags, "tag-explorer", "Tag Explorer")
+    if (section) sections.push(section)
+  }
+
+  if (sections.length === 0) return
+
+  // Accordion: exactly the section matching `openKey` is expanded; "" collapses all.
+  const apply = (openKey: string) => {
+    for (const section of sections) {
+      const open = section.key === openKey
+      section.button.setAttribute("aria-expanded", String(open))
+      section.panel.classList.toggle("panel-collapsed", !open)
+    }
+  }
+
+  apply(readOpenKey())
+
+  for (const section of sections) {
+    // Re-binding on SPA nav is harmless for fresh DOM, but guard in case the node is reused.
+    if (section.button.dataset.accordionBound === "true") continue
+    section.button.dataset.accordionBound = "true"
+    section.button.addEventListener("click", () => {
+      const isOpen = section.button.getAttribute("aria-expanded") === "true"
+      const next = isOpen ? "" : section.key
+      apply(next)
+      writeOpenKey(next)
+    })
+  }
 }
 
 setup()

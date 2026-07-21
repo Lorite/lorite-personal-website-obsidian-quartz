@@ -64,7 +64,37 @@
   background: none;
 }
 
-/* --- collapsible headers (Recent Notes / Tag Explorer) ---
+/* The Explorer's list is its own scroll container with `overscroll-behavior: contain`, which
+   swallows wheel events while the pointer is over it — so the sidebar wouldn't scroll when hovering
+   the file tree. The panel is the single scroll container now, so let the wheel through. */
+.left.sidebar .sidebar-panels .explorer .explorer-ul {
+  overscroll-behavior: auto;
+  overflow: visible;
+  max-height: none;
+}
+
+/* --- Recent Notes normalisation ---
+   Each entry's title is a bare <h3>, so it inherits the site's full heading size and towers over the
+   Explorer's and Tag Explorer's ~0.95rem links. Bring it in line (v4 did the same in
+   recentNotes.scss) so all three sections read as one list. */
+.left.sidebar .sidebar-panels .recent-notes .recent-li .desc h3 {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.25;
+  font-weight: 400;
+}
+
+.left.sidebar .sidebar-panels .recent-notes .recent-li {
+  margin: 0.3rem 0;
+}
+
+.left.sidebar .sidebar-panels .recent-notes .recent-ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* --- collapsible headers (Recent Notes / Explorer / Tag Explorer) ---
    Styled to match the Explorer's own .title-button so the three read as one control set. */
 .left.sidebar .sidebar-panels .panel-toggle {
   display: flex;
