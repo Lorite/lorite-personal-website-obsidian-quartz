@@ -128,6 +128,10 @@ plugins:
     order: 92
   - source: github:quartz-community/fonts
     enabled: true
+  # Local plugin: site-wide CSS tweaks (the v5 home for what was quartz/styles/base.scss in v4) —
+  # left-sidebar panel sizing, mobile scroll-padding, ::selection colour.
+  - source: ./local-plugins/site-styles
+    enabled: true
   # Local plugin: loads the Font Awesome stylesheet used by the site-footer link icons.
   - source: ./local-plugins/icon-fonts
     enabled: true
@@ -339,6 +343,9 @@ plugins:
       linkToMore: false
       hideFolderPages: true
       hideTagPages: true
+      # Each entry otherwise renders a full tag list (~117px per item), which made the panel ~1700px
+      # tall and pushed the Explorer and Tag Explorer out of the sidebar. Title + date only.
+      showTags: false
     # v4 showed a "Recent Notes" panel prominently in the left sidebar. Custom filter (exclude
     # collection-index notes) is applied in quartz.ts. Sits above the folder explorer (priority 50).
     layout:

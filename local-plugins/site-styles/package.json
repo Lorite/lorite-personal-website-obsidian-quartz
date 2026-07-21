@@ -1,0 +1,30 @@
+{
+  "name": "@lorite/quartz-site-styles",
+  "version": "1.0.0",
+  "description": "Site-wide CSS tweaks that don't belong to a single component (the v5 home for what was quartz/styles/base.scss in v4)",
+  "type": "module",
+  "license": "MIT",
+  "private": true,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "sideEffects": false,
+  "quartz": {
+    "name": "site-styles",
+    "displayName": "Site Styles",
+    "category": "transformer",
+    "version": "1.0.0",
+    "quartzVersion": ">=5.0.0",
+    "dependencies": [],
+    "defaultOrder": 6,
+    "defaultEnabled": true,
+    "defaultOptions": {},
+    "optionSchema": {}
+  }
+}

@@ -2,6 +2,10 @@
 .tag-explorer {
   overflow-y: auto;
   max-height: 30rem;
+  /* The sidebar is a flex column: without this the panel gets shrunk to a rendered height of 0
+     when the panels above it (e.g. Recent Notes) claim all the space. */
+  flex: 0 1 auto;
+  min-height: 6rem;
 }
 
 .tag-explorer h3 {

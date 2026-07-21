@@ -1,0 +1,45 @@
+/*
+ * Site-wide CSS tweaks. In Quartz v4 these lived in the forked quartz/styles/base.scss; v5's core
+ * styles aren't forkable, so they're injected as an inline stylesheet by this plugin.
+ */
+
+/* ---------------------------------------------------------------------------
+ * Left sidebar panel sizing.
+ *
+ * The left sidebar is a flex column. Recent Notes has no height cap, so with 10
+ * entries it grew to ~870px, consumed the column and flex-squashed the Tag
+ * Explorer to a rendered height of 0 (its scrollHeight was still ~980px, i.e.
+ * fully rendered but with no room). Cap the tall panels and stop them being
+ * crushed, so every panel keeps a usable share and scrolls internally.
+ * ------------------------------------------------------------------------- */
+.left.sidebar > * {
+  /* flex items default to min-height:auto, which prevents internal scrolling */
+  min-height: 0;
+}
+
+.left.sidebar .recent-notes {
+  max-height: 20rem;
+  overflow-y: auto;
+  flex: 0 1 auto;
+}
+
+.left.sidebar .explorer {
+  flex: 0 1 auto;
+}
+
+/* ---------------------------------------------------------------------------
+ * Ported from the v4 base.scss customizations.
+ * ------------------------------------------------------------------------- */
+
+/* Anchor links shouldn't land under the mobile header. */
+@media all and (max-width: 800px) {
+  html {
+    scroll-padding-top: 4rem;
+  }
+}
+
+/* Use the theme's textHighlight for selection rather than a mix of --tertiary. */
+::selection {
+  background: var(--textHighlight);
+  color: var(--darkgray);
+}

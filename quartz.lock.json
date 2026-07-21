@@ -235,6 +235,12 @@
       "commit": "local",
       "installedAt": "2026-07-21T17:07:32.845Z"
     },
+    "site-styles": {
+      "source": "./local-plugins/site-styles",
+      "resolved": "/home/lori/git/lorite-personal-website-obsidian-quartz/local-plugins/site-styles",
+      "commit": "local",
+      "installedAt": "2026-07-21T17:42:23.271Z"
+    },
     "spacer": {
       "source": "github:quartz-community/spacer",
       "resolved": "https://github.com/quartz-community/spacer.git",
