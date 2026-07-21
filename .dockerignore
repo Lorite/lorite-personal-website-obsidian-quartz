@@ -1,0 +1,16 @@
+# Keep the build context small and make image builds reproducible.
+# Without this, `COPY . .` pulls the host's node_modules (wrong arch/native builds for e.g. sharp)
+# on top of the `npm ci` result, plus the synced content, build output and installed plugins.
+.git
+node_modules
+public
+content
+.quartz
+.quartz-cache
+quartz/.quartz-cache
+*.rootowned
+prof
+tsconfig.tsbuildinfo
+.vscode
+.claude
+.DS_Store
