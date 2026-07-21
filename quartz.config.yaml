@@ -132,6 +132,10 @@ plugins:
   # left-sidebar panel sizing, mobile scroll-padding, ::selection colour.
   - source: ./local-plugins/site-styles
     enabled: true
+  # Local plugin: makes the generated collection-index tables (movies, research, ...) sortable
+  # and filterable client-side.
+  - source: ./local-plugins/collection-table
+    enabled: true
   # Local plugin: loads the Font Awesome stylesheet used by the site-footer link icons.
   - source: ./local-plugins/icon-fonts
     enabled: true

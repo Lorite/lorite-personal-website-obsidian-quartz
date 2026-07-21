@@ -49,6 +49,12 @@
       "commit": "ec4c81c91da13a6f6c2cbe1656daf5c14575dab3",
       "installedAt": "2026-07-15T09:25:41.988Z"
     },
+    "collection-table": {
+      "source": "./local-plugins/collection-table",
+      "resolved": "/home/lori/git/lorite-personal-website-obsidian-quartz/local-plugins/collection-table",
+      "commit": "local",
+      "installedAt": "2026-07-21T17:58:24.703Z"
+    },
     "comments": {
       "source": "github:quartz-community/comments",
       "resolved": "https://github.com/quartz-community/comments.git",

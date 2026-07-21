@@ -503,40 +503,73 @@ async function generateCollectionIndex(
       )
     : sortedNotes.filter((n) => path.basename(n.destPath).toLowerCase() !== "index.md")
 
-  // Build markdown list
-  const lines: string[] = []
-  lines.push(`${title} from newest to oldest:`)
-  lines.push("")
-  for (const n of listNotes) {
-    const displayTitle = getDisplayTitle(n)
-    const ratingColor = getRatingColor(n.personalRating)
-    const ratingText =
-      n.personalRating !== undefined && n.personalRating !== 0 ? `${n.personalRating}/10` : ""
-    const ratingDisplayFormatted = ratingText
-      ? ` <span style="color:${ratingColor}">${ratingText}</span>`
-      : ""
+  // Build a GitHub-flavored markdown table. A markdown table (rather than raw HTML) matters: cells
+  // still go through the markdown pipeline, so [[wikilinks]] in "full" mode entries resolve. The
+  // `collection-table` plugin turns the rendered <table> into a sortable/filterable one client-side.
+  //
+  // Columns are conditional so collections without ratings or item types don't show empty columns.
+  const hasType = listNotes.some((n) => humanizeItemType(n.itemType))
+  const hasRating = listNotes.some((n) => n.personalRating !== undefined && n.personalRating !== 0)
+  const hasDate = listNotes.some((n) => n.updatedTS > 0)
 
+  // Escape characters that would otherwise break out of a markdown table cell.
+  const cell = (s: string) => s.replace(/\|/g, "\\|").replace(/\n+/g, " ").trim()
+
+  const headers = ["Title", ...(hasType ? ["Type"] : []), ...(hasRating ? ["Rating"] : [])]
+  if (hasDate) headers.push("Updated")
+
+  const lines: string[] = []
+  lines.push(`${title}, newest first. Click a column header to sort.`)
+  lines.push("")
+  lines.push(`| ${headers.join(" | ")} |`)
+  lines.push(`| ${headers.map(() => "---").join(" | ")} |`)
+
+  for (const n of listNotes) {
+    // The item type gets its own column now, so titles no longer need the "(journal article)"
+    // suffix — which also means wikilinks can be written without an alias. That avoids a literal
+    // "|" inside [[...]], which a markdown table would otherwise treat as a column separator.
+    let titleCell: string
     if (n.mode === "external" && n.externalUrl) {
-      lines.push(`- [${displayTitle}](${n.externalUrl})${ratingDisplayFormatted}`)
+      titleCell = `[${cell(n.title)}](${n.externalUrl})`
     } else if (n.mode === "full") {
-      // For index.md files, use folder path; otherwise use title
       if (path.basename(n.destPath).toLowerCase() === "index.md") {
-        const folderPath = n.folderRel.replace(/\\/g, "/")
-        lines.push(`- [[${folderPath}/]]${ratingDisplayFormatted}`)
+        titleCell = `[[${n.folderRel.replace(/\\/g, "/")}/]]`
       } else {
-        lines.push(`- [[${n.title}|${displayTitle}]]${ratingDisplayFormatted}`)
+        titleCell = `[[${cell(n.title)}]]`
       }
     } else {
-      // title-only: show plain text entry
-      lines.push(`- ${displayTitle}${ratingDisplayFormatted}`)
+      titleCell = cell(n.title)
     }
+
+    const row = [titleCell]
+
+    if (hasType) row.push(cell(humanizeItemType(n.itemType)))
+
+    if (hasRating) {
+      const hasValue = n.personalRating !== undefined && n.personalRating !== 0
+      row.push(
+        hasValue
+          ? `<span style="color:${getRatingColor(n.personalRating)}">${n.personalRating}/10</span>`
+          : "",
+      )
+    }
+
+    if (hasDate) {
+      // <time datetime> gives the sort script an exact, locale-independent value to compare.
+      const iso = n.updatedTS > 0 ? new Date(n.updatedTS).toISOString() : ""
+      row.push(iso ? `<time datetime="${iso}">${iso.slice(0, 10)}</time>` : "")
+    }
+
+    lines.push(`| ${row.join(" | ")} |`)
   }
 
   const content = lines.join("\n")
   const extra = frontmatterExtra ?? {}
   const extraTags = Array.isArray(extra.tags) ? (extra.tags as string[]) : []
   const tags = Array.from(new Set([...extraTags, "collection-index"]))
-  const fm = { title, publish: true, ...extra, tags }
+  // cssclasses lands on the rendered <article> (see the content-page plugin), which is how the
+  // collection-table script scopes itself to these generated pages only.
+  const fm = { title, publish: true, cssclasses: ["collection-index"], ...extra, tags }
   const fileOut = matter.stringify(content, fm)
   await fs.promises.mkdir(indexDir, { recursive: true })
   await fs.promises.writeFile(indexPath, fileOut, "utf8")
