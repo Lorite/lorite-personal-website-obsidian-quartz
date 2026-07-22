@@ -173,6 +173,45 @@ function setup() {
   }
 }
 
+/**
+ * Safety net for an upstream Explorer race.
+ *
+ * The community Explorer builds its file tree entirely client-side, and its nav handler (`L` in the
+ * plugin) is bound to BOTH the `nav` and `render` events, which fire close together. It clears the
+ * list, does an async `await` to fetch/build the tree, then renders ONLY if no newer event fired in
+ * the meantime (`if (e === b)`). When two events overlap, the superseded one has already cleared the
+ * list and then skips rendering — so the Explorer intermittently shows no folders.
+ *
+ * We can't patch the plugin's minified code, but we can notice the empty result and re-trigger it:
+ * an empty populated tree is a `.explorer-ul` containing only its `.overflow-end` sentinel. If that's
+ * the case a moment after navigation, dispatch a fresh `render` event (which the Explorer listens to
+ * but this script does not, so no recursion here) to rebuild, retrying a few times with backoff.
+ */
+function explorerIsEmpty(): boolean {
+  const ul = document.querySelector(".left.sidebar .explorer .explorer-ul")
+  if (!ul) return false // no explorer on this page → nothing to fix
+  return ul.querySelector(".folder-container, .nav-file-title, .nav-folder-title") === null
+}
+
+function ensureExplorerPopulated(attempt = 0) {
+  const maxAttempts = 4
+  window.setTimeout(
+    () => {
+      if (!explorerIsEmpty()) return
+      if (attempt >= maxAttempts) return
+      // Re-run the Explorer's own nav/render handler to rebuild the tree.
+      document.dispatchEvent(new CustomEvent("render"))
+      ensureExplorerPopulated(attempt + 1)
+    },
+    250 + attempt * 250,
+  )
+}
+
 setup()
+ensureExplorerPopulated()
+
 // Quartz's SPA router replaces the sidebar contents without a full page load.
-document.addEventListener("nav", setup)
+document.addEventListener("nav", () => {
+  setup()
+  ensureExplorerPopulated()
+})
