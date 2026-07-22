@@ -50,6 +50,13 @@
   display: none;
 }
 
+/* The Explorer's toggle is APPENDED (last child) rather than prepended so it doesn't shift the
+   Explorer's client-render templates during SPA navigation (see sidebarPanels.inline.ts). The
+   Explorer is already a flex column, so `order: -1` shows the appended toggle first. */
+.left.sidebar .sidebar-panels .explorer > .panel-toggle {
+  order: -1;
+}
+
 .left.sidebar .sidebar-panels .explorer .explorer-content {
   position: static;
   transform: none;
@@ -106,19 +113,9 @@
   padding: 0;
 }
 
-/* Each section is a flex column so the toggle (appended last for micromorph safety — see the inline
-   script) can be shown first via `order: -1`, with the section's real content below it. */
-.left.sidebar .sidebar-panels .recent-notes,
-.left.sidebar .sidebar-panels .explorer,
-.left.sidebar .sidebar-panels .tag-explorer {
-  display: flex;
-  flex-direction: column;
-}
-
 /* --- collapsible headers (Recent Notes / Explorer / Tag Explorer) ---
    Styled to match the Explorer's own .title-button so the three read as one control set. */
 .left.sidebar .sidebar-panels .panel-toggle {
-  order: -1; /* appended last in the DOM, shown first */
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -155,14 +152,6 @@
   transform: rotate(-90deg);
 }
 
-/* Collapse by hiding every direct child of the panel EXCEPT the toggle button — no DOM is moved, so
-   the Explorer's client-render templates are left intact (see sidebarPanels.inline.ts). */
-.left.sidebar .sidebar-panels .panel-collapsed > *:not(.panel-toggle) {
-  display: none;
-}
-
-/* The script hides each section's own heading (the toggle carries the label instead) rather than
-   removing it, so nothing in the section is restructured. */
-.left.sidebar .sidebar-panels .panel-orig-heading {
+.left.sidebar .sidebar-panels .panel-collapsed .panel-content {
   display: none;
 }
