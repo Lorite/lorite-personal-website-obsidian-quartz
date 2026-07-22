@@ -176,42 +176,85 @@ function setup() {
 /**
  * Safety net for an upstream Explorer race.
  *
- * The community Explorer builds its file tree entirely client-side, and its nav handler (`L` in the
+ * The community Explorer builds its file tree entirely client-side, and its handler (`L` in the
  * plugin) is bound to BOTH the `nav` and `render` events, which fire close together. It clears the
- * list, does an async `await` to fetch/build the tree, then renders ONLY if no newer event fired in
- * the meantime (`if (e === b)`). When two events overlap, the superseded one has already cleared the
- * list and then skips rendering — so the Explorer intermittently shows no folders.
+ * `.explorer-ul`, `await`s an async fetch/build, then renders ONLY if no newer event fired in the
+ * meantime (`if (e === b)`). When two events overlap, the superseded invocation has already cleared
+ * the list and then skips rendering — leaving the Explorer empty. On a large content index the build
+ * is slow (hundreds of ms to seconds), which widens the window and makes this reliably reproducible.
  *
- * We can't patch the plugin's minified code, but we can notice the empty result and re-trigger it:
- * an empty populated tree is a `.explorer-ul` containing only its `.overflow-end` sentinel. If that's
- * the case a moment after navigation, dispatch a fresh `render` event (which the Explorer listens to
- * but this script does not, so no recursion here) to rebuild, retrying a few times with backoff.
+ * We can't patch the plugin's minified code. The naive fix — poll and re-dispatch on a short timer —
+ * backfires: a re-dispatch fired while the (slow) build is still in flight supersedes it and keeps it
+ * empty. So instead we watch the Explorer's OWN status logging to tell a stuck render (it logged a
+ * skip / empty result) from a slow one still in progress, and only re-dispatch when it's genuinely
+ * stuck. A generous timer is kept as a fallback in case the plugin's log strings change.
+ *
+ * Re-dispatching `render` (which the Explorer listens to but this script does not) avoids recursion,
+ * and produces correct hrefs — only the per-page "active" highlight is skipped on a healed render.
  */
+type ExplorerStatus = "" | "ok" | "stuck"
+let explorerStatus: ExplorerStatus = ""
+const EXPLORER_OK = /Render complete/
+const EXPLORER_STUCK = /skipping tree render|No trie or empty children|No data received|No content/
+
+// Observe the Explorer's own [Explorer] console messages to classify the last render outcome.
+;(function hookConsoleForExplorer() {
+  const methods = ["log", "warn", "error"] as const
+  for (const method of methods) {
+    const original = console[method].bind(console)
+    console[method] = (...args: unknown[]) => {
+      const first = args[0]
+      if (typeof first === "string" && first.includes("[Explorer]")) {
+        if (EXPLORER_OK.test(first)) explorerStatus = "ok"
+        else if (EXPLORER_STUCK.test(first)) explorerStatus = "stuck"
+      }
+      original(...args)
+    }
+  }
+})()
+
 function explorerIsEmpty(): boolean {
   const ul = document.querySelector(".left.sidebar .explorer .explorer-ul")
   if (!ul) return false // no explorer on this page → nothing to fix
   return ul.querySelector(".folder-container, .nav-file-title, .nav-folder-title") === null
 }
 
-function ensureExplorerPopulated(attempt = 0) {
-  const maxAttempts = 4
-  window.setTimeout(
-    () => {
-      if (!explorerIsEmpty()) return
-      if (attempt >= maxAttempts) return
-      // Re-run the Explorer's own nav/render handler to rebuild the tree.
+// Each nav starts a fresh healing cycle; older cycles stop when the token changes.
+let healToken = 0
+
+function healExplorer() {
+  const token = ++healToken
+  const maxDispatches = 3
+  const graceMs = 4000 // if the plugin's logs ever change, still heal after this long empty
+  let dispatches = 0
+  let elapsed = 0
+  const stepMs = 300
+
+  const tick = () => {
+    if (token !== healToken) return // superseded by a newer navigation
+    if (!explorerIsEmpty()) return // populated → healthy, done
+    if (explorerStatus === "ok") return // plugin says it rendered; not our problem to fix
+
+    const stuck = explorerStatus === "stuck" || elapsed >= graceMs
+    if (stuck && dispatches < maxDispatches) {
+      dispatches += 1
+      explorerStatus = "" // watch the outcome of the render we're about to trigger
       document.dispatchEvent(new CustomEvent("render"))
-      ensureExplorerPopulated(attempt + 1)
-    },
-    250 + attempt * 250,
-  )
+    }
+
+    if (dispatches >= maxDispatches) return
+    elapsed += stepMs
+    window.setTimeout(tick, stepMs)
+  }
+
+  window.setTimeout(tick, stepMs)
 }
 
 setup()
-ensureExplorerPopulated()
+healExplorer()
 
 // Quartz's SPA router replaces the sidebar contents without a full page load.
 document.addEventListener("nav", () => {
   setup()
-  ensureExplorerPopulated()
+  healExplorer()
 })
