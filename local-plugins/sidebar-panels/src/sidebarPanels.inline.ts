@@ -1,23 +1,23 @@
 /**
- * Turns the three left-sidebar panels (Recent Notes, Explorer, Tag Explorer) into one panel with
- * collapsible sections that look and behave identically.
+ * Presents the three left-sidebar panels (Recent Notes, Explorer, Tag Explorer) as one panel with
+ * collapsible sections behaving as an accordion: at most one section is expanded at a time, and the
+ * other two stay visible as their collapsed headers. Clicking the open section closes it (all three
+ * collapsed — also the first-visit default). The choice is remembered in localStorage.
  *
- * They're placed in a single Quartz layout group (see the `sidebar-panels` group in
- * quartz.config.yaml), which renders them inside one `.flex-component` container. That container
- * gets a `sidebar-panels` class here so the CSS can style it as a single bordered panel.
+ * IMPORTANT — how the toggle is injected (this took a while to get right).
+ * The community Explorer renders its file tree client-side by cloning `<template id="template-folder">`
+ * / `<template id="template-file">` elements that live as the LAST children of `.explorer`. Quartz
+ * navigates via micromorph, which reconciles the old and new DOM by child position. If we PREPEND our
+ * toggle button as the first child of `.explorer`, every subsequent child is offset by one, so on the
+ * next navigation micromorph mis-matches the templates against the wrong nodes and mangles them —
+ * the folder template loses its inner `.content` container, the renderer can no longer recurse into
+ * children, and the tree collapses to just its top-level folders (looks empty/broken).
  *
- * Behaviour: an accordion — at most one section is expanded at a time, and the other two always
- * remain visible as their collapsed headers. Clicking the open section closes it, leaving all three
- * collapsed (which is also the default on a first visit). The choice is remembered in localStorage.
- *
- * All three sections get the same generated header. The Explorer ships its own toggle
- * (`button.explorer-toggle` around an <h2>), but inside this panel it doesn't work — its handler
- * never updates `aria-expanded` — and its <h2> looks nothing like the other sections' <h3>. So its
- * native toggles are hidden (via CSS) and it gets the shared header, using its existing
- * `.explorer-content` as the collapsible body.
+ * The fix: APPEND the button (so it's the trailing extra node micromorph simply drops, leaving the
+ * templates in their original positions) and use CSS `order: -1` to show it first. We also never move
+ * a section's content — collapse is purely a CSS class — so the Explorer's own DOM is left intact.
  */
 
-/** Key of the single expanded section, or "" when all are collapsed. */
 const STORAGE_KEY = "sidebar-panels:open"
 
 interface Section {
@@ -47,7 +47,6 @@ function readOpenKey(): string {
   try {
     return localStorage.getItem(STORAGE_KEY) ?? ""
   } catch {
-    // localStorage can throw in private mode; default to all collapsed.
     return ""
   }
 }
@@ -56,44 +55,19 @@ function writeOpenKey(key: string) {
   try {
     localStorage.setItem(STORAGE_KEY, key)
   } catch {
-    // ignore
+    // ignore (private mode)
   }
 }
 
 /**
- * Give a panel a collapsible header and return it as a section.
- *
- * `existingContent` lets a panel nominate an element that already holds its body (the Explorer's
- * `.explorer-content`); otherwise everything after the panel's heading is moved into a new wrapper.
+ * Give a panel a collapsible header without moving any of its content.
+ * `label` is the section title; any pre-existing `> h3` heading is hidden (the toggle carries the
+ * label instead) but left in the DOM so nothing is restructured.
  */
-function buildSection(
-  panel: HTMLElement,
-  key: string,
-  label: string,
-  existingContent?: HTMLElement | null,
-): Section | null {
-  if (panel.dataset.collapsibleReady === "true") {
-    const existing = panel.querySelector(":scope > .panel-toggle")
-    return existing instanceof HTMLButtonElement ? { key, panel, button: existing } : null
-  }
-  panel.dataset.collapsibleReady = "true"
-
-  let content: HTMLElement
-  if (existingContent) {
-    content = existingContent
-    content.classList.add("panel-content")
-  } else {
-    const heading = panel.querySelector(":scope > h3")
-    content = document.createElement("div")
-    content.className = "panel-content"
-    let node: ChildNode | null = heading ? heading.nextSibling : panel.firstChild
-    while (node) {
-      const next: ChildNode | null = node.nextSibling
-      content.appendChild(node)
-      node = next
-    }
-    heading?.remove()
-    panel.append(content)
+function buildSection(panel: HTMLElement, key: string, label: string): Section | null {
+  const existing = panel.querySelector(":scope > .panel-toggle")
+  if (existing instanceof HTMLButtonElement) {
+    return { key, panel, button: existing }
   }
 
   const button = document.createElement("button")
@@ -102,8 +76,14 @@ function buildSection(
   const h3 = document.createElement("h3")
   h3.textContent = label
   button.append(h3, chevron())
-  panel.prepend(button)
 
+  // Hide (don't remove) the section's own heading so we don't restructure its DOM.
+  const ownHeading = panel.querySelector(":scope > h3")
+  if (ownHeading instanceof HTMLElement) ownHeading.classList.add("panel-orig-heading")
+
+  // APPEND (not prepend) — see the file header. CSS `order: -1` shows it first. Appending keeps the
+  // button as the trailing node so micromorph doesn't offset (and mangle) the Explorer's templates.
+  panel.append(button)
   return { key, panel, button }
 }
 
@@ -122,30 +102,16 @@ function setup() {
   group.classList.add("sidebar-panels")
 
   const sections: Section[] = []
-
-  const recent = group.querySelector(".recent-notes")
-  if (recent instanceof HTMLElement) {
-    const section = buildSection(recent, "recent-notes", "Recent Notes")
-    if (section) sections.push(section)
+  const add = (selector: string, key: string, label: string) => {
+    const panel = group.querySelector(selector)
+    if (panel instanceof HTMLElement) {
+      const section = buildSection(panel, key, label)
+      if (section) sections.push(section)
+    }
   }
-
-  const explorer = group.querySelector(".explorer")
-  if (explorer instanceof HTMLElement) {
-    const content = explorer.querySelector(".explorer-content")
-    const section = buildSection(
-      explorer,
-      "explorer",
-      "Explorer",
-      content instanceof HTMLElement ? content : null,
-    )
-    if (section) sections.push(section)
-  }
-
-  const tags = group.querySelector(".tag-explorer")
-  if (tags instanceof HTMLElement) {
-    const section = buildSection(tags, "tag-explorer", "Tag Explorer")
-    if (section) sections.push(section)
-  }
+  add(".recent-notes", "recent-notes", "Recent Notes")
+  add(".explorer", "explorer", "Explorer")
+  add(".tag-explorer", "tag-explorer", "Tag Explorer")
 
   if (sections.length === 0) return
 
@@ -161,7 +127,6 @@ function setup() {
   apply(readOpenKey())
 
   for (const section of sections) {
-    // Re-binding on SPA nav is harmless for fresh DOM, but guard in case the node is reused.
     if (section.button.dataset.accordionBound === "true") continue
     section.button.dataset.accordionBound = "true"
     section.button.addEventListener("click", () => {
@@ -173,88 +138,6 @@ function setup() {
   }
 }
 
-/**
- * Safety net for an upstream Explorer race.
- *
- * The community Explorer builds its file tree entirely client-side, and its handler (`L` in the
- * plugin) is bound to BOTH the `nav` and `render` events, which fire close together. It clears the
- * `.explorer-ul`, `await`s an async fetch/build, then renders ONLY if no newer event fired in the
- * meantime (`if (e === b)`). When two events overlap, the superseded invocation has already cleared
- * the list and then skips rendering — leaving the Explorer empty. On a large content index the build
- * is slow (hundreds of ms to seconds), which widens the window and makes this reliably reproducible.
- *
- * We can't patch the plugin's minified code. The naive fix — poll and re-dispatch on a short timer —
- * backfires: a re-dispatch fired while the (slow) build is still in flight supersedes it and keeps it
- * empty. So instead we watch the Explorer's OWN status logging to tell a stuck render (it logged a
- * skip / empty result) from a slow one still in progress, and only re-dispatch when it's genuinely
- * stuck. A generous timer is kept as a fallback in case the plugin's log strings change.
- *
- * Re-dispatching `render` (which the Explorer listens to but this script does not) avoids recursion,
- * and produces correct hrefs — only the per-page "active" highlight is skipped on a healed render.
- */
-type ExplorerStatus = "" | "ok" | "stuck"
-let explorerStatus: ExplorerStatus = ""
-const EXPLORER_OK = /Render complete/
-const EXPLORER_STUCK = /skipping tree render|No trie or empty children|No data received|No content/
-
-// Observe the Explorer's own [Explorer] console messages to classify the last render outcome.
-;(function hookConsoleForExplorer() {
-  const methods = ["log", "warn", "error"] as const
-  for (const method of methods) {
-    const original = console[method].bind(console)
-    console[method] = (...args: unknown[]) => {
-      const first = args[0]
-      if (typeof first === "string" && first.includes("[Explorer]")) {
-        if (EXPLORER_OK.test(first)) explorerStatus = "ok"
-        else if (EXPLORER_STUCK.test(first)) explorerStatus = "stuck"
-      }
-      original(...args)
-    }
-  }
-})()
-
-function explorerIsEmpty(): boolean {
-  const ul = document.querySelector(".left.sidebar .explorer .explorer-ul")
-  if (!ul) return false // no explorer on this page → nothing to fix
-  return ul.querySelector(".folder-container, .nav-file-title, .nav-folder-title") === null
-}
-
-// Each nav starts a fresh healing cycle; older cycles stop when the token changes.
-let healToken = 0
-
-function healExplorer() {
-  const token = ++healToken
-  const maxDispatches = 3
-  const graceMs = 4000 // if the plugin's logs ever change, still heal after this long empty
-  let dispatches = 0
-  let elapsed = 0
-  const stepMs = 300
-
-  const tick = () => {
-    if (token !== healToken) return // superseded by a newer navigation
-    if (!explorerIsEmpty()) return // populated → healthy, done
-    if (explorerStatus === "ok") return // plugin says it rendered; not our problem to fix
-
-    const stuck = explorerStatus === "stuck" || elapsed >= graceMs
-    if (stuck && dispatches < maxDispatches) {
-      dispatches += 1
-      explorerStatus = "" // watch the outcome of the render we're about to trigger
-      document.dispatchEvent(new CustomEvent("render"))
-    }
-
-    if (dispatches >= maxDispatches) return
-    elapsed += stepMs
-    window.setTimeout(tick, stepMs)
-  }
-
-  window.setTimeout(tick, stepMs)
-}
-
 setup()
-healExplorer()
-
 // Quartz's SPA router replaces the sidebar contents without a full page load.
-document.addEventListener("nav", () => {
-  setup()
-  healExplorer()
-})
+document.addEventListener("nav", setup)
