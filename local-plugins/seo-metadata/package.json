@@ -1,0 +1,66 @@
+{
+  "name": "@lorite/quartz-seo-metadata",
+  "version": "1.0.0",
+  "description": "Adds a per-page canonical link and a schema.org Person + WebSite graph for name-search SEO",
+  "type": "module",
+  "license": "MIT",
+  "private": true,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "sideEffects": false,
+  "quartz": {
+    "name": "seo-metadata",
+    "displayName": "SEO Metadata",
+    "category": "transformer",
+    "version": "1.0.0",
+    "quartzVersion": ">=5.0.0",
+    "dependencies": [],
+    "defaultOrder": 5,
+    "defaultEnabled": true,
+    "defaultOptions": {
+      "personName": "",
+      "alternateNames": [],
+      "jobTitle": "",
+      "personDescription": "",
+      "affiliation": null,
+      "sameAs": [],
+      "personSlugs": [
+        "index"
+      ],
+      "emitCanonical": true
+    },
+    "optionSchema": {
+      "personName": {
+        "type": "string"
+      },
+      "alternateNames": {
+        "type": "array"
+      },
+      "jobTitle": {
+        "type": "string"
+      },
+      "personDescription": {
+        "type": "string"
+      },
+      "affiliation": {
+        "type": "object"
+      },
+      "sameAs": {
+        "type": "array"
+      },
+      "personSlugs": {
+        "type": "array"
+      },
+      "emitCanonical": {
+        "type": "boolean"
+      }
+    }
+  }
+}

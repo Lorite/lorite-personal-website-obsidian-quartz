@@ -4,7 +4,9 @@
 # JS-callback options (custom Explorer filter/sort) and the QUARTZ_BASE_URL env override live in quartz.ts.
 configuration:
   pageTitle: Lorite's Notes
-  pageTitleSuffix: ""
+  # Appended to every page's <title> (quartz/components/Head.tsx). Without it no page on the site
+  # mentions the name people actually search for, which is the point of the whole exercise.
+  pageTitleSuffix: " | Alejandro Lorite Mora"
   enableSPA: true
   enablePopovers: true
   analytics:
@@ -144,6 +146,34 @@ plugins:
     enabled: true
     options:
       author: Alejandro Lorite Mora
+  # Local plugin: <link rel="canonical"> on every page + a schema.org Person/WebSite graph on the
+  # homepage. `sameAs` is the load-bearing option: it is what tells Google that this domain, Scholar,
+  # GitHub, LinkedIn, ORCID and the ITU pages are all one person, which is the whole game when the
+  # target query is a personal name. Keep the list in sync with the footer links.
+  - source: ./local-plugins/seo-metadata
+    enabled: true
+    options:
+      personName: Alejandro Lorite Mora
+      alternateNames:
+        - Alejandro Lorite
+        - Lorite
+      jobTitle: Industrial PhD Student in Robotics
+      personDescription:
+        Industrial PhD student in robotics at the IT University of Copenhagen, working on active
+        inspection with quadruped robots and drones.
+      affiliation:
+        name: IT University of Copenhagen
+        url: https://www.itu.dk/
+      sameAs:
+        - https://scholar.google.es/citations?user=M5fEBD8AAAAJ&hl=en
+        - https://github.com/Lorite
+        - https://www.linkedin.com/in/alejandro-lorite-mora
+        - https://orcid.org/0000-0002-8704-1248
+        - https://x.com/aloritemora
+        - https://pure.itu.dk/en/persons/alejandro-lorite-mora
+        - https://real.itu.dk/people/alejandro-lorite-mora/
+      personSlugs:
+        - index
   # Local plugin: one collapsible sidebar panel for Recent Notes + Explorer + Tag Explorer.
   - source: ./local-plugins/sidebar-panels
     enabled: true
