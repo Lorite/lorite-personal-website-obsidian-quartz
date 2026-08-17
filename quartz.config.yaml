@@ -191,6 +191,19 @@ plugins:
         - ^tags/
         - /index$
       noindexMinWords: 25
+  # Local plugin: emits sitemap.xml with ONLY the indexable pages, replacing content-index's
+  # sitemap (turned off above). The two option values below MUST stay identical to the
+  # seo-metadata ones directly above: if they drift, the sitemap submits URLs whose pages say
+  # noindex, which Search Console reports as the error "Submitted URL marked 'noindex'". The rule
+  # itself is shared code (local-plugins/seo-metadata/src/noindex.ts), so only these inputs can
+  # diverge.
+  - source: ./local-plugins/seo-sitemap
+    enabled: true
+    options:
+      noindexPatterns:
+        - ^tags/
+        - /index$
+      noindexMinWords: 25
   # Local plugin: one collapsible sidebar panel for Recent Notes + Explorer + Tag Explorer.
   - source: ./local-plugins/sidebar-panels
     enabled: true
@@ -214,7 +227,11 @@ plugins:
   - source: github:quartz-community/content-index
     enabled: true
     options:
-      enableSiteMap: true
+      # Off because ./local-plugins/seo-sitemap emits sitemap.xml instead. This one lists every
+      # page including the ~60 that now serve noindex, and Google reports that contradiction as the
+      # error "Submitted URL marked 'noindex'". Leaving both on would have two plugins writing the
+      # same file, with the winner decided by load order.
+      enableSiteMap: false
       enableRSS: true
   - source: github:quartz-community/favicon
     enabled: true

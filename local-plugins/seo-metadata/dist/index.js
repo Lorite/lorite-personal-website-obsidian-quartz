@@ -1,3 +1,14 @@
+// local-plugins/seo-metadata/src/noindex.ts
+function compileNoindexPatterns(sources) {
+  return sources.map((p) => new RegExp(p));
+}
+function isNoindexed(slug, text, patterns, minWords) {
+  if (slug === "404") return false;
+  if (!patterns.some((re) => re.test(slug))) return false;
+  const words = (text ?? "").trim().split(/\s+/).filter(Boolean).length;
+  return words < minWords;
+}
+
 // local-plugins/seo-metadata/src/index.tsx
 import { jsx } from "preact/jsx-runtime";
 var DEFAULTS = {
@@ -20,12 +31,6 @@ function absoluteUrl(origin, slug) {
   const trimmed = slug.replace(/(^|\/)index$/, "$1");
   return new URL(trimmed, origin).href;
 }
-function isNoindexed(slug, text, patterns, minWords) {
-  if (slug === "404") return false;
-  if (!patterns.some((re) => re.test(slug))) return false;
-  const words = (text ?? "").trim().split(/\s+/).filter(Boolean).length;
-  return words < minWords;
-}
 function safeJsonLd(value) {
   return JSON.stringify(value).replace(/</g, "\\u003c");
 }
@@ -42,7 +47,7 @@ var SeoMetadata = (opts) => {
       const origin = siteOrigin(ctx);
       const personSlugs = new Set(cfg.personSlugs);
       const additionalHead = [];
-      const noindexPatterns = cfg.noindexPatterns.map((p) => new RegExp(p));
+      const noindexPatterns = compileNoindexPatterns(cfg.noindexPatterns);
       if (noindexPatterns.length) {
         additionalHead.push((fileData) => {
           const slug = fileData.slug;
@@ -139,6 +144,8 @@ var SeoMetadata = (opts) => {
 };
 var index_default = SeoMetadata;
 export {
-  index_default as default
+  compileNoindexPatterns,
+  index_default as default,
+  isNoindexed
 };
 //# sourceMappingURL=index.js.map

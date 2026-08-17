@@ -1,0 +1,40 @@
+{
+  "name": "@lorite/quartz-seo-sitemap",
+  "version": "1.0.0",
+  "description": "Emits sitemap.xml containing only indexable pages, sharing the noindex rule with seo-metadata",
+  "type": "module",
+  "license": "MIT",
+  "private": true,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "sideEffects": false,
+  "quartz": {
+    "name": "seo-sitemap",
+    "displayName": "SEO Sitemap",
+    "category": "emitter",
+    "version": "1.0.0",
+    "quartzVersion": ">=5.0.0",
+    "dependencies": [],
+    "defaultOrder": 55,
+    "defaultEnabled": true,
+    "defaultOptions": {
+      "noindexPatterns": [],
+      "noindexMinWords": 25
+    },
+    "optionSchema": {
+      "noindexPatterns": {
+        "type": "array"
+      },
+      "noindexMinWords": {
+        "type": "number"
+      }
+    }
+  }
+}

@@ -1,4 +1,8 @@
 import type { BuildCtx, QuartzTransformerPlugin } from "@quartz-community/types"
+// Shared with the `seo-sitemap` emitter on purpose. See noindex.ts for why the two must not drift.
+import { compileNoindexPatterns, isNoindexed } from "./noindex"
+
+export { compileNoindexPatterns, isNoindexed } from "./noindex"
 
 export interface SeoAffiliation {
   name: string
@@ -93,28 +97,6 @@ function absoluteUrl(origin: URL, slug: string): string {
   return new URL(trimmed, origin).href
 }
 
-/**
- * Should this page be hidden from search indexes?
- *
- * Two conditions, both required: the slug looks like an auto-generated listing page, and the page
- * renders almost no text. The word check is the important half — without it this would also hide
- * folder pages that do show something, whether authored prose or a populated Bases table.
- *
- * The homepage is never matched: its slug is the bare `index`, while folder pages are `<dir>/index`,
- * so a pattern anchored on `/index` cannot reach it. The 404 page is excluded explicitly.
- */
-function isNoindexed(
-  slug: string,
-  text: string | undefined,
-  patterns: RegExp[],
-  minWords: number,
-): boolean {
-  if (slug === "404") return false
-  if (!patterns.some((re) => re.test(slug))) return false
-  const words = (text ?? "").trim().split(/\s+/).filter(Boolean).length
-  return words < minWords
-}
-
 /** JSON-LD is injected as raw text, so `<` must not be able to close the script element. */
 function safeJsonLd(value: unknown): string {
   return JSON.stringify(value).replace(/</g, "\\u003c")
@@ -146,7 +128,7 @@ const SeoMetadata: QuartzTransformerPlugin<Partial<SeoMetadataOptions>> = (opts)
       const origin = siteOrigin(ctx)
       const personSlugs = new Set(cfg.personSlugs)
       const additionalHead: unknown[] = []
-      const noindexPatterns = cfg.noindexPatterns.map((p) => new RegExp(p))
+      const noindexPatterns = compileNoindexPatterns(cfg.noindexPatterns)
 
       if (noindexPatterns.length) {
         additionalHead.push((fileData: { slug?: string; text?: string }) => {
