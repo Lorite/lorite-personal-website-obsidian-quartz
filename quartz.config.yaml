@@ -174,6 +174,23 @@ plugins:
         - https://real.itu.dk/people/alejandro-lorite-mora/
       personSlugs:
         - index
+      # The biography page, declared as a ProfilePage whose mainEntity is the Person above. This is
+      # an entity signal, not an indexing one — Google is explicit that structured data does not
+      # affect whether a page is indexed.
+      profilePageSlugs:
+        - professional-background
+      # Keep Quartz's auto-generated folder and tag indexes out of Google. They carry no prose of
+      # their own (the links live in the page chrome, so the <article> is empty) and they were 64 of
+      # the 97 sitemap URLs, so two thirds of what Google saw was near-identical boilerplate.
+      # `^tags/` covers tag pages; `/index$` covers folder pages and cannot match the homepage,
+      # whose slug is the bare `index` with no slash. noindexMinWords spares listing pages that
+      # actually render something (a folder note, or a Bases table with rows in it) — measured on
+      # rendered text, so /media/videogames/pokemon/ survives on its table while /media/books/ does
+      # not. "noindex, follow" keeps the crawler walking through to the notes underneath.
+      noindexPatterns:
+        - ^tags/
+        - /index$
+      noindexMinWords: 25
   # Local plugin: one collapsible sidebar panel for Recent Notes + Explorer + Tag Explorer.
   - source: ./local-plugins/sidebar-panels
     enabled: true

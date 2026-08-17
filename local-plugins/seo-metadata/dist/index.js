@@ -8,7 +8,10 @@ var DEFAULTS = {
   affiliation: null,
   sameAs: [],
   personSlugs: ["index"],
-  emitCanonical: true
+  profilePageSlugs: [],
+  emitCanonical: true,
+  noindexPatterns: [],
+  noindexMinWords: 25
 };
 function siteOrigin(ctx) {
   return new URL(`https://${ctx.cfg.configuration.baseUrl ?? "example.com"}`);
@@ -16,6 +19,12 @@ function siteOrigin(ctx) {
 function absoluteUrl(origin, slug) {
   const trimmed = slug.replace(/(^|\/)index$/, "$1");
   return new URL(trimmed, origin).href;
+}
+function isNoindexed(slug, text, patterns, minWords) {
+  if (slug === "404") return false;
+  if (!patterns.some((re) => re.test(slug))) return false;
+  const words = (text ?? "").trim().split(/\s+/).filter(Boolean).length;
+  return words < minWords;
 }
 function safeJsonLd(value) {
   return JSON.stringify(value).replace(/</g, "\\u003c");
@@ -33,6 +42,15 @@ var SeoMetadata = (opts) => {
       const origin = siteOrigin(ctx);
       const personSlugs = new Set(cfg.personSlugs);
       const additionalHead = [];
+      const noindexPatterns = cfg.noindexPatterns.map((p) => new RegExp(p));
+      if (noindexPatterns.length) {
+        additionalHead.push((fileData) => {
+          const slug = fileData.slug;
+          if (!slug) return null;
+          if (!isNoindexed(slug, fileData.text, noindexPatterns, cfg.noindexMinWords)) return null;
+          return /* @__PURE__ */ jsx("meta", { name: "robots", content: "noindex, follow" }, "seo-noindex");
+        });
+      }
       if (cfg.emitCanonical) {
         additionalHead.push((fileData) => {
           const slug = fileData.slug;
@@ -88,6 +106,32 @@ var SeoMetadata = (opts) => {
             "seo-person-jsonld"
           );
         });
+        if (cfg.profilePageSlugs.length) {
+          const profileSlugs = new Set(cfg.profilePageSlugs);
+          additionalHead.push((fileData) => {
+            const slug = fileData.slug;
+            if (!slug || !profileSlugs.has(slug)) return null;
+            const pageUrl = absoluteUrl(origin, slug);
+            const profile = {
+              "@context": "https://schema.org",
+              "@type": "ProfilePage",
+              "@id": `${pageUrl}#profilepage`,
+              url: pageUrl,
+              // `person` is reused verbatim, `mainEntityOfPage` included. It deliberately still
+              // points at the homepage: the two nodes share an `@id`, so overriding it here would
+              // have one entity asserting two different canonical pages for itself.
+              mainEntity: person
+            };
+            return /* @__PURE__ */ jsx(
+              "script",
+              {
+                type: "application/ld+json",
+                dangerouslySetInnerHTML: { __html: safeJsonLd(profile) }
+              },
+              "seo-profilepage-jsonld"
+            );
+          });
+        }
       }
       return additionalHead.length ? { additionalHead } : {};
     }
