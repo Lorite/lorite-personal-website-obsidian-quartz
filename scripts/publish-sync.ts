@@ -457,9 +457,35 @@ type NoteMeta = {
   mode: "full" | "title" | "external"
   externalUrl?: string
   updatedTS: number
+  // Newest of the last-consumed fields (0 = none). The media lists sort by this first.
+  consumedTS: number
   collectionRoot?: string
   personalRating?: number
   itemType?: string
+}
+
+// When a media work was last watched / read / listened to / played, kept current nightly
+// from ActivityWatch by lorite-activitywatch's exporters/media_last_consumed.py (and, for
+// older films and series, by the Trakt import). Local time "YYYY-MM-DDTHH:MM".
+const CONSUMED_KEYS = ["last_watched", "last_read", "last_listened", "last_played"]
+
+// A frontmatter date as epoch ms, 0 when empty or unreadable. gray-matter gives a Date for
+// full YAML timestamps and a string for the minute-precision values these notes use.
+function parseTimestamp(raw: unknown): number {
+  if (typeof raw === "string") {
+    const t = Date.parse(raw)
+    return Number.isNaN(t) ? 0 : t
+  }
+  if (raw instanceof Date) {
+    const t = raw.getTime()
+    return Number.isNaN(t) ? 0 : t
+  }
+  if (typeof raw === "number") return raw
+  return 0
+}
+
+function sortTS(note: NoteMeta): number {
+  return note.consumedTS || note.updatedTS || 0
 }
 
 function humanizeItemType(itemType?: string): string {
@@ -491,8 +517,13 @@ async function generateCollectionIndex(
   filterIndexPath?: string,
   frontmatterExtra?: Record<string, unknown>,
 ): Promise<number> {
-  // Sort by date (newest first)
-  const sortedNotes = notes.slice().sort((a, b) => (b.updatedTS || 0) - (a.updatedTS || 0))
+  // Newest first, by when the work was last consumed: a series rewatched this week belongs on
+  // top even if it was catalogued years ago. Notes with no consumption date follow, by when
+  // they were last edited. Mixing the two would let a bulk frontmatter edit push never-tracked
+  // notes above works played last month.
+  const sortedNotes = notes
+    .slice()
+    .sort((a, b) => Number(b.consumedTS > 0) - Number(a.consumedTS > 0) || sortTS(b) - sortTS(a))
 
   // Filter out index.md if path specified, or by basename
   const listNotes = filterIndexPath
@@ -510,16 +541,21 @@ async function generateCollectionIndex(
   // Columns are conditional so collections without ratings or item types don't show empty columns.
   const hasType = listNotes.some((n) => humanizeItemType(n.itemType))
   const hasRating = listNotes.some((n) => n.personalRating !== undefined && n.personalRating !== 0)
-  const hasDate = listNotes.some((n) => n.updatedTS > 0)
+  const hasDate = listNotes.some((n) => sortTS(n) > 0)
+  const hasConsumed = listNotes.some((n) => n.consumedTS > 0)
 
   // Escape characters that would otherwise break out of a markdown table cell.
   const cell = (s: string) => s.replace(/\|/g, "\\|").replace(/\n+/g, " ").trim()
 
   const headers = ["Title", ...(hasType ? ["Type"] : []), ...(hasRating ? ["Rating"] : [])]
-  if (hasDate) headers.push("Updated")
+  if (hasDate) headers.push(hasConsumed ? "Last consumed" : "Updated")
 
   const lines: string[] = []
-  lines.push(`${title}, newest first. Click a column header to sort.`)
+  lines.push(
+    hasConsumed
+      ? `${title}, most recently consumed first. Click a column header to sort.`
+      : `${title}, newest first. Click a column header to sort.`,
+  )
   lines.push("")
   lines.push(`| ${headers.join(" | ")} |`)
   lines.push(`| ${headers.map(() => "---").join(" | ")} |`)
@@ -556,8 +592,13 @@ async function generateCollectionIndex(
 
     if (hasDate) {
       // <time datetime> gives the sort script an exact, locale-independent value to compare.
-      const iso = n.updatedTS > 0 ? new Date(n.updatedTS).toISOString() : ""
-      row.push(iso ? `<time datetime="${iso}">${iso.slice(0, 10)}</time>` : "")
+      const ts = sortTS(n)
+      const iso = ts > 0 ? new Date(ts).toISOString() : ""
+      // In a "Last consumed" column, a row without a consumption date shows its edit date,
+      // and says so on hover rather than passing it off as a consumption date.
+      const hint =
+        hasConsumed && !n.consumedTS ? ' title="No consumption date recorded: last edited"' : ""
+      row.push(iso ? `<time datetime="${iso}"${hint}>${iso.slice(0, 10)}</time>` : "")
     }
 
     lines.push(`| ${row.join(" | ")} |`)
@@ -709,17 +750,8 @@ async function sync() {
         ? itemTypeRaw.trim()
         : undefined
 
-    const updatedRaw = (parsed.data.updated as unknown) ?? null
-    let updatedTS = 0
-    if (typeof updatedRaw === "string") {
-      const t = Date.parse(updatedRaw)
-      updatedTS = Number.isNaN(t) ? 0 : t
-    } else if (updatedRaw instanceof Date) {
-      const t = updatedRaw.getTime()
-      updatedTS = Number.isNaN(t) ? 0 : t
-    } else if (typeof updatedRaw === "number") {
-      updatedTS = updatedRaw
-    }
+    const updatedTS = parseTimestamp(parsed.data.updated)
+    const consumedTS = Math.max(0, ...CONSUMED_KEYS.map((k) => parseTimestamp(parsed.data[k])))
 
     // Record metadata for folder index generation
     const folderRel = path.dirname(path.relative(destRoot, dest)).replace(/\\/g, "/")
@@ -739,6 +771,7 @@ async function sync() {
       mode,
       externalUrl,
       updatedTS,
+      consumedTS,
       collectionRoot: collectionRoot || undefined,
       personalRating,
       itemType,
