@@ -129,9 +129,12 @@ function isAssetPath(p: string): boolean {
 }
 
 function removePrivateNotes(content: string): string {
+  // A block that stands on its own lines leaves a paragraph break behind. Replacing it and its
+  // newlines with "" glued the next line onto the previous one: in Quartz.md a heading merged
+  // into the bullet above it, and a table row absorbed the line after the block.
   return content.replace(
-    /\n*{%\s*start_private_notes\s*%\}[\s\S]*?\{%\s*end_private_notes\s*%\}\n*/g,
-    "",
+    /(\n*){%\s*start_private_notes\s*%\}[\s\S]*?\{%\s*end_private_notes\s*%\}(\n*)/g,
+    (_m, before: string, after: string) => (before || after ? "\n\n" : ""),
   )
 }
 
