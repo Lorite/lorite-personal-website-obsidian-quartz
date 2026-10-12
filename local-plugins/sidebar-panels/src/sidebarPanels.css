@@ -155,3 +155,73 @@
 .left.sidebar .sidebar-panels .panel-collapsed .panel-content {
   display: none;
 }
+
+/* --- mobile drawer ---
+   On narrow screens Quartz turns the left sidebar into one horizontal header row. The bordered
+   panel does not fit there (it made the page wider than the phone), so on mobile it collapses to a
+   hamburger button that opens the panel as a full-screen drawer. See setupMobileMenu in
+   sidebarPanels.inline.ts. The button only exists for mobile. */
+.left.sidebar .sidebar-panels-menu {
+  display: none;
+}
+
+@media all and (max-width: 800px) {
+  /* Closed: only the hamburger is visible, first in the header row like the upstream Explorer. */
+  .left.sidebar .sidebar-panels {
+    order: -1;
+    flex: 0 0 auto;
+    border: none;
+    padding: 0;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .left.sidebar .sidebar-panels > div {
+    display: none;
+  }
+
+  .left.sidebar .sidebar-panels-menu {
+    display: flex;
+    order: -1;
+    align-items: center;
+    justify-content: center;
+    margin: 0 0.5rem 0 0;
+    padding: 5px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--darkgray);
+  }
+
+  /* Open: the panel covers the screen and scrolls on its own. */
+  .left.sidebar .sidebar-panels.mobile-open {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    /* The top and left padding keep the hamburger where it was in the header row. */
+    padding: 1rem 1rem 2rem;
+    border-radius: 0;
+    background-color: var(--light);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .left.sidebar .sidebar-panels.mobile-open > div {
+    display: block;
+  }
+
+  .left.sidebar .sidebar-panels.mobile-open > .sidebar-panels-menu {
+    align-self: flex-start;
+    margin-bottom: 0.5rem;
+  }
+
+  /* The Explorer's own mobile CSS makes it a fixed 34px row with a slide-in drawer. Inside this
+     panel it is a normal section, so undo that sizing (the drawer part is already undone above). */
+  .left.sidebar .sidebar-panels .explorer {
+    order: 0;
+    flex: 0 0 auto;
+    align-self: stretch;
+    margin: 0;
+    overflow: visible;
+  }
+}

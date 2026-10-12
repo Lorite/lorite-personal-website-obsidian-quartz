@@ -117,6 +117,81 @@ function buildSection(
   return { key, panel, button }
 }
 
+function menuIcon(): SVGSVGElement {
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg")
+  svg.setAttribute("viewBox", "0 0 24 24")
+  svg.setAttribute("width", "24")
+  svg.setAttribute("height", "24")
+  svg.setAttribute("fill", "none")
+  svg.setAttribute("stroke", "currentColor")
+  svg.setAttribute("stroke-width", "2")
+  svg.setAttribute("stroke-linecap", "round")
+  svg.setAttribute("stroke-linejoin", "round")
+  for (const y of ["6", "12", "18"]) {
+    const line = document.createElementNS("http://www.w3.org/2000/svg", "line")
+    line.setAttribute("x1", "4")
+    line.setAttribute("x2", "20")
+    line.setAttribute("y1", y)
+    line.setAttribute("y2", y)
+    svg.appendChild(line)
+  }
+  return svg
+}
+
+/**
+ * Mobile drawer.
+ *
+ * On narrow screens Quartz lays the left sidebar out as one horizontal header row (title, search,
+ * toolbar). The bordered panel does not fit in that row: it pushed the page wider than the phone
+ * and the panel itself was unusable. The Explorer normally shows its own hamburger on mobile, but
+ * that button is hidden here because the panel replaces the Explorer's toggles.
+ *
+ * So on mobile the whole panel becomes a hamburger button that opens it as a full-screen drawer
+ * (CSS in sidebarPanels.css, only inside the mobile media query). The button is APPENDED to the
+ * group for the same micromorph reason as the Explorer toggle (see buildSection), and is shown
+ * first with `order: -1`. On desktop the button is hidden and nothing changes.
+ */
+function setMobileOpen(group: HTMLElement, button: HTMLButtonElement, open: boolean) {
+  group.classList.toggle("mobile-open", open)
+  button.setAttribute("aria-expanded", String(open))
+  button.setAttribute("aria-label", open ? "Close menu" : "Open menu")
+  document.documentElement.classList.toggle("mobile-no-scroll", open)
+}
+
+function setupMobileMenu(group: HTMLElement) {
+  const existing = group.querySelector(":scope > .sidebar-panels-menu")
+  let menuButton: HTMLButtonElement
+  if (existing instanceof HTMLButtonElement) {
+    menuButton = existing
+  } else {
+    menuButton = document.createElement("button")
+    menuButton.type = "button"
+    menuButton.className = "sidebar-panels-menu"
+    menuButton.append(menuIcon())
+    group.append(menuButton)
+  }
+
+  // A fresh page always starts with the drawer closed (SPA navigation from a link inside it too).
+  setMobileOpen(group, menuButton, false)
+
+  if (menuButton.dataset.menuBound === "true") return
+  menuButton.dataset.menuBound = "true"
+  menuButton.addEventListener("click", () => {
+    setMobileOpen(group, menuButton, !group.classList.contains("mobile-open"))
+  })
+}
+
+// Escape closes the drawer. Bound once, because this script is preserved across SPA navigation.
+document.addEventListener("keydown", (event) => {
+  if (event.key !== "Escape") return
+  const group = document.querySelector(".left.sidebar .sidebar-panels.mobile-open")
+  const button = group?.querySelector(":scope > .sidebar-panels-menu")
+  if (group instanceof HTMLElement && button instanceof HTMLButtonElement) {
+    setMobileOpen(group, button, false)
+    button.focus()
+  }
+})
+
 function setup() {
   const sidebar = document.querySelector(".left.sidebar")
   if (!sidebar) return
@@ -130,6 +205,7 @@ function setup() {
   const group = anchor?.closest(".flex-component")
   if (!(group instanceof HTMLElement)) return
   group.classList.add("sidebar-panels")
+  setupMobileMenu(group)
 
   const sections: Section[] = []
 
