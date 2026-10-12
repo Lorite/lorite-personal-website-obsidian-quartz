@@ -37,5 +37,5 @@ ENV PORT=3000
 EXPOSE 3000
 
 # At container start: sync publishable notes from the mounted vault into content/, build, add slide
-# folder index redirects, then serve.
-CMD ["/bin/sh", "-c", "if [ -d \"$NOTES_SOURCE\" ] && [ \"$(ls -A \"$NOTES_SOURCE\" 2>/dev/null)\" ]; then npm run sync:published -- --source \"$NOTES_SOURCE\" --dest \"content\"; else echo 'Notes source missing or empty at '$NOTES_SOURCE', skipping sync.'; fi && npx quartz build && node scripts/gen-slide-indexes.mjs public/static/slides && node scripts/serve.mjs public"]
+# folder index redirects (all in scripts/rebuild.sh, which the Coolify scheduled task also runs), then serve.
+CMD ["/bin/sh", "-c", "sh scripts/rebuild.sh && node scripts/serve.mjs public"]

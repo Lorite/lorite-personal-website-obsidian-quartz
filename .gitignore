@@ -16,3 +16,5 @@ quartz/cli/tui/dist/
 # content stays untracked (never `git add` it); only content/.gitkeep is committed.
 # Build artifacts left root-owned by a previous Docker build (safe to delete with sudo)
 *.rootowned
+public.next
+public.prev

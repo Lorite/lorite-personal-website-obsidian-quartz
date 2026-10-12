@@ -14,3 +14,5 @@ tsconfig.tsbuildinfo
 .vscode
 .claude
 .DS_Store
+public.next
+public.prev
