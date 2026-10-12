@@ -467,7 +467,12 @@ type NoteMeta = {
 // When a media work was last watched / read / listened to / played, kept current nightly
 // from ActivityWatch by lorite-activitywatch's exporters/media_last_consumed.py (and, for
 // older films and series, by the Trakt import). Local time "YYYY-MM-DDTHH:MM".
-const CONSUMED_KEYS = ["last_watched", "last_read", "last_listened", "last_played"]
+// `date_read` is the read date of research and article notes (Zotero, Wallabag, Omnivore).
+// Without it those lists sorted by `updated`, which bulk edits move: on 2026-10-12, 19 of the
+// 26 listed papers showed the day a sync script rewrote every note. Its values come as
+// "2022-05-12 07:09", "2025-06-23 10:42 am" or ISO with an offset, and Date.parse reads all of
+// them. A junk value such as "|" gives 0, so the note falls back to `updated` as before.
+const CONSUMED_KEYS = ["last_watched", "last_read", "last_listened", "last_played", "date_read"]
 
 // A frontmatter date as epoch ms, 0 when empty or unreadable. gray-matter gives a Date for
 // full YAML timestamps and a string for the minute-precision values these notes use.
