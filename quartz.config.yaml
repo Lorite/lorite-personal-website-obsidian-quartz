@@ -288,7 +288,6 @@ plugins:
     layout:
       position: left
       priority: 55
-      display: desktop-only
       group: sidebar-panels
   - source: github:quartz-community/graph
     enabled: true
