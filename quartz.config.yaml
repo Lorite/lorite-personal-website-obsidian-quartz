@@ -6,7 +6,7 @@ configuration:
   pageTitle: Lorite's Notes
   # Appended to every page's <title> (quartz/components/Head.tsx). Without it no page on the site
   # mentions the name people actually search for, which is the point of the whole exercise.
-  pageTitleSuffix: " | Alejandro Lorite-Mora"
+  pageTitleSuffix: " | Alejandro Lorite Mora"
   enableSPA: true
   enablePopovers: true
   analytics:
@@ -145,7 +145,7 @@ plugins:
   - source: ./local-plugins/site-styles
     enabled: true
     options:
-      author: Alejandro Lorite-Mora
+      author: Alejandro Lorite Mora
   # Local plugin: <link rel="canonical"> on every page + a schema.org Person/WebSite graph on the
   # homepage. `sameAs` is the load-bearing option: it is what tells Google that this domain, Scholar,
   # GitHub, LinkedIn, ORCID and the ITU pages are all one person, which is the whole game when the
@@ -153,9 +153,8 @@ plugins:
   - source: ./local-plugins/seo-metadata
     enabled: true
     options:
-      personName: Alejandro Lorite-Mora
+      personName: Alejandro Lorite Mora
       alternateNames:
-        - Alejandro Lorite Mora
         - Alejandro Lorite
         - Lorite
       jobTitle: Industrial PhD Student in Robotics
@@ -405,7 +404,7 @@ plugins:
   - source: ./local-plugins/footer
     enabled: true
     options:
-      name: Alejandro Lorite-Mora
+      name: Alejandro Lorite Mora
       role: Robotics PhD Student
       organization:
         name: IT University of Copenhagen
